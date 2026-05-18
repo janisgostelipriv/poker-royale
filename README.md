@@ -8,8 +8,8 @@
 ## 2. Keys in die HTML eintragen
 In `poker_app.html` ganz oben im `<script>`-Block:
 ```js
-const SUPABASE_URL = 'https://DEIN-PROJEKT.supabase.co';
-const SUPABASE_ANON_KEY = 'dein-anon-key';
+const SUPABASE_URL = 'https://muastgqwrnajfqhtricq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11YXN0Z3F3cm5hamZxaHRyaWNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMDc1NTUsImV4cCI6MjA5NDY4MzU1NX0.2Ep00IbfTiVPbQcFkbv6kCQMr2u2q7adGhfFDjho0NU';
 ```
 
 ## 3. Auth-URLs in Supabase eintragen
