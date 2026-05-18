@@ -248,11 +248,11 @@
 <div id="login-screen" class="auth-wrap hidden">
   <div class="auth-card">
     <div class="brand">POKER<span class="dot"></span>ROYAL</div>
-    <div class="auth-sub">Anmelden mit Email-Link</div>
+    <div class="auth-sub">Admin Login</div>
     <form id="login-form">
-      <input type="email" id="login-email" required placeholder="deine@email.ch">
-      <button type="submit" class="btn btn-gold" id="login-btn">Magic Link senden</button>
-      <div id="login-msg" class="msg hidden"></div>
+      <input type="email" id="login-email" required placeholder="Email">
+      <input type="password" id="login-password" required placeholder="Passwort">
+      <button type="submit" class="btn btn-gold" id="login-btn">Anmelden</button>
       <div id="login-err" class="error hidden"></div>
     </form>
   </div>
@@ -448,21 +448,15 @@ async function initAuth() {
 $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = $('login-email').value.trim();
-  if (!email) return;
+  const password = $('login-password').value;
+  if (!email || !password) return;
   $('login-btn').disabled = true;
-  $('login-msg').classList.add('hidden');
   $('login-err').classList.add('hidden');
-  const { error } = await sb.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.href.split('#')[0].split('?')[0] }
-  });
+  const { error } = await sb.auth.signInWithPassword({ email, password });
   $('login-btn').disabled = false;
   if (error) {
-    $('login-err').textContent = error.message;
+    $('login-err').textContent = 'Email oder Passwort falsch.';
     $('login-err').classList.remove('hidden');
-  } else {
-    $('login-msg').textContent = 'Magic Link gesendet. Schau in dein Postfach.';
-    $('login-msg').classList.remove('hidden');
   }
 });
 
