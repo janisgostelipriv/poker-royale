@@ -501,7 +501,7 @@ $('create-group-btn').addEventListener('click', async () => {
   const name = $('new-group-name').value.trim();
   if (!name) { toast('Name fehlt'); return; }
   $('create-group-btn').disabled = true;
-  const { error } = await sb.from('groups').insert({ name, owner_id: state.user.id }).select().single();
+  const { error } = await sb.rpc('create_group', { group_name: name });
   $('create-group-btn').disabled = false;
   if (error) { console.error('Gruppe erstellen:', error); alert('Fehler: ' + error.message); return; }
   $('new-group-name').value = '';
