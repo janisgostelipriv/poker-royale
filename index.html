@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poker Royal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --felt-deep: #0b1220;
+    --felt: #131c30;
+    --felt-raised: #1c2742;
+    --felt-border: #2a3656;
+    --gold: #6366f1;
+    --gold-dim: #4f46e5;
+    --gold-soft: rgba(99, 102, 241, 0.15);
+    --cream: #e5e7eb;
+    --muted: #94a3b8;
+    --win: #10b981;
+    --loss: #ef4444;
+    --shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--felt-deep);
+    background-image:
+      radial-gradient(ellipse at top, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(99, 102, 241, 0.04) 0%, transparent 60%);
+    color: var(--cream);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.015) 1px, transparent 0);
+    background-size: 3px 3px; pointer-events: none; z-index: 0;
+  }
+  .app { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 32px 24px 80px; }
+  header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 24px; border-bottom: 1px solid var(--felt-border); margin-bottom: 32px;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .brand {
+    font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 26px;
+    letter-spacing: 0.12em; color: var(--gold);
+  }
+  .brand .dot { display: inline-block; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; margin: 0 6px 4px; vertical-align: middle; }
+  .tagline { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
+  .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 32px; background: rgba(0,0,0,0.3);
+    padding: 4px; border-radius: 12px; border: 1px solid var(--felt-border);
+  }
+  .tab {
+    flex: 1; padding: 12px 16px; background: transparent; color: var(--muted);
+    border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.25s ease;
+  }
+  .tab:hover { color: var(--cream); }
+  .tab.active { background: var(--felt-raised); color: var(--gold); }
+
+  .panel {
+    background: linear-gradient(180deg, var(--felt) 0%, var(--felt-deep) 100%);
+    border: 1px solid var(--felt-border); border-radius: 16px; padding: 28px;
+    margin-bottom: 20px; box-shadow: var(--shadow);
+  }
+  .panel-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream); margin-bottom: 4px; }
+  .panel-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 12px; }
+  .form-row.single { grid-template-columns: 1fr auto; }
+  input, select {
+    background: rgba(0,0,0,0.35); border: 1px solid var(--felt-border); color: var(--cream);
+    padding: 12px 14px; border-radius: 8px; font-family: 'Manrope', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  input:focus, select:focus { border-color: var(--gold-dim); }
+  input::placeholder { color: var(--muted); opacity: 0.6; }
+  input[type="number"], input[type="date"] { font-family: 'JetBrains Mono', monospace; color-scheme: dark; }
+
+  .btn {
+    padding: 12px 20px; border-radius: 8px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s ease; white-space: nowrap;
+  }
+  .btn-gold { background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dim) 100%); color: #fff; box-shadow: 0 2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2); }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+  .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-ghost { background: transparent; color: var(--gold); border: 1px solid var(--gold-dim); }
+  .btn-ghost:hover { background: var(--gold-soft); }
+  .btn-danger { background: transparent; color: var(--loss); border: 1px solid rgba(248,113,113,0.3); }
+  .btn-danger:hover { background: rgba(248,113,113,0.1); }
+  .btn-sm { padding: 8px 14px; font-size: 11px; }
+
+  .player-row {
+    display: grid; grid-template-columns: 32px 1fr 1fr auto; align-items: center; gap: 14px;
+    padding: 14px 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--felt-border);
+    border-radius: 10px; margin-bottom: 8px;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dim), var(--felt-raised));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif; font-weight: 700; color: var(--cream); font-size: 14px;
+  }
+  .player-name { font-weight: 600; font-size: 15px; }
+  .player-handle { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .empty-state {
+    text-align: center; padding: 32px; color: var(--muted); font-style: italic;
+    border: 1px dashed var(--felt-border); border-radius: 10px;
+  }
+
+  .game-status {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: var(--gold-soft); border: 1px solid var(--gold-dim);
+    border-radius: 10px; margin-bottom: 20px;
+  }
+  .status-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; box-shadow: 0 0 12px var(--gold); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .status-text { font-size: 13px; color: var(--cream); }
+  .status-text strong { color: var(--gold); font-family: 'JetBrains Mono', monospace; }
+
+  .game-grid { display: grid; gap: 10px; }
+  .game-player-row {
+    display: grid; grid-template-columns: 32px 1fr 110px 110px 100px;
+    align-items: center; gap: 12px; padding: 14px 16px;
+    background: rgba(0,0,0,0.25); border: 1px solid var(--felt-border); border-radius: 10px;
+  }
+  .game-player-row input { text-align: right; padding: 8px 10px; }
+  .stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; text-align: right; font-size: 14px; }
+  .stat-win { color: var(--win); }
+  .stat-loss { color: var(--loss); }
+  .game-header-row {
+    display: grid; grid-template-columns: 32px 1fr 110px 110px 100px;
+    gap: 12px; padding: 0 16px 8px;
+    font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em;
+  }
+  .game-header-row > div { text-align: right; }
+  .game-header-row > div:nth-child(2) { text-align: left; }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; }
+
+  .settle-card {
+    display: flex; align-items: center; gap: 16px; padding: 16px 20px;
+    background: linear-gradient(90deg, rgba(248,113,113,0.08), rgba(110,231,183,0.08));
+    border: 1px solid var(--felt-border); border-radius: 10px; margin-bottom: 8px;
+  }
+  .settle-arrow { font-family: 'JetBrains Mono', monospace; color: var(--gold); font-size: 20px; }
+  .settle-amount { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 18px; color: var(--gold); }
+  .settle-from { color: var(--loss); font-weight: 600; }
+  .settle-to-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .settle-to { color: var(--win); font-weight: 600; }
+  .settle-phone { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold); text-decoration: none; opacity: 0.8; }
+  .settle-phone:hover { opacity: 1; text-decoration: underline; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-tile { padding: 16px; background: rgba(0,0,0,0.25); border: 1px solid var(--felt-border); border-radius: 10px; text-align: center; }
+  .stat-tile .num { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: var(--gold); }
+  .stat-tile .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 4px; }
+
+  .ranking-row {
+    display: grid; grid-template-columns: 28px 32px 1fr auto auto; align-items: center;
+    gap: 14px; padding: 14px 16px; background: rgba(0,0,0,0.2);
+    border: 1px solid var(--felt-border); border-radius: 10px; margin-bottom: 6px;
+  }
+  .rank { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px; color: var(--gold); text-align: center; }
+  .rank-1 { color: #fde047; }
+  .games-played { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+  .all-time-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 16px; min-width: 80px; text-align: right; }
+
+  .history-game { padding: 16px 20px; background: rgba(0,0,0,0.2); border: 1px solid var(--felt-border); border-radius: 10px; margin-bottom: 8px; }
+  .history-game-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
+  .history-date { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--gold); }
+  .history-pot { font-size: 12px; color: var(--muted); }
+  .history-results { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .history-result { padding: 4px 10px; border-radius: 4px; background: rgba(0,0,0,0.3); }
+
+  .player-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .player-pill {
+    padding: 8px 14px; background: rgba(0,0,0,0.3); border: 1px solid var(--felt-border);
+    border-radius: 20px; font-size: 13px; cursor: pointer; transition: all 0.2s; user-select: none;
+  }
+  .player-pill.selected { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
+
+  .hidden { display: none !important; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--felt-raised); color: var(--gold); padding: 12px 20px;
+    border-radius: 8px; border: 1px solid var(--gold-dim); font-size: 13px;
+    opacity: 0; transition: all 0.3s; z-index: 200; pointer-events: none; box-shadow: var(--shadow);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .auth-card { background: var(--felt); border: 1px solid var(--felt-border); border-radius: 16px; padding: 40px; max-width: 420px; width: 100%; box-shadow: var(--shadow); }
+  .auth-card .brand { display: block; text-align: center; margin-bottom: 8px; }
+  .auth-sub { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+  .auth-card form { display: flex; flex-direction: column; gap: 12px; }
+  .auth-card .btn-gold { width: 100%; padding: 14px; }
+  .auth-card .msg { color: var(--win); font-size: 13px; text-align: center; margin-top: 12px; }
+  .auth-card .error { color: var(--loss); font-size: 13px; text-align: center; margin-top: 8px; }
+
+  .group-row {
+    display: grid; grid-template-columns: 40px 1fr auto auto; align-items: center; gap: 14px;
+    padding: 16px; background: rgba(0,0,0,0.25); border: 1px solid var(--felt-border);
+    border-radius: 10px; margin-bottom: 8px; transition: all 0.2s;
+  }
+  .group-row:hover { border-color: var(--gold-dim); }
+  .group-name { font-weight: 600; font-size: 16px; }
+  .group-code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+
+  .config-warn {
+    margin: 40px auto; max-width: 600px; padding: 24px; background: rgba(248,113,113,0.1);
+    border: 1px solid var(--loss); border-radius: 12px; color: var(--cream);
+  }
+  .config-warn h2 { margin-bottom: 12px; color: var(--loss); }
+  .config-warn code { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; }
+
+  @media (max-width: 640px) {
+    header { flex-direction: column; align-items: flex-start; }
+    .form-row { grid-template-columns: 1fr; }
+    .game-player-row, .game-header-row { grid-template-columns: 28px 1fr 90px; }
+    .game-player-row > .cashout-cell, .game-header-row > div:nth-child(4) { display: none; }
+    .game-player-row > .net-cell, .game-header-row > div:nth-child(5) { display: none; }
+    .panel { padding: 20px; }
+    .tab { font-size: 11px; padding: 10px 8px; }
+    .group-row { grid-template-columns: 40px 1fr; }
+    .group-row > *:nth-child(n+3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="config-warn" class="config-warn hidden">
+  <h2>Setup nötig</h2>
+  <p>Trage in dieser HTML-Datei (im <code>&lt;script&gt;</code>-Block ganz oben) deine Supabase-URL und den Anon-Key ein. Siehe <code>README.md</code>.</p>
+</div>
+
+<div id="login-screen" class="auth-wrap hidden">
+  <div class="auth-card">
+    <div class="brand">POKER<span class="dot"></span>ROYAL</div>
+    <div class="auth-sub">Anmelden mit Email-Link</div>
+    <form id="login-form">
+      <input type="email" id="login-email" required placeholder="deine@email.ch">
+      <button type="submit" class="btn btn-gold" id="login-btn">Magic Link senden</button>
+      <div id="login-msg" class="msg hidden"></div>
+      <div id="login-err" class="error hidden"></div>
+    </form>
+  </div>
+</div>
+
+<div id="groups-screen" class="app hidden">
+  <header>
+    <div class="brand">POKER<span class="dot"></span>ROYAL</div>
+    <div class="header-right">
+      <span class="tagline" id="user-email"></span>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <div class="panel">
+    <div class="panel-title">Deine Gruppen</div>
+    <div class="panel-sub" id="groups-sub">Wähle eine Gruppe</div>
+    <div id="groups-list"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Neue Gruppe</div>
+    <div class="form-row single">
+      <input type="text" id="new-group-name" placeholder="Gruppenname z.B. Donnerstag Crew" maxlength="40">
+      <button class="btn btn-gold" id="create-group-btn">Erstellen</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Gruppe beitreten</div>
+    <div class="form-row single">
+      <input type="text" id="join-code" placeholder="Einladungs-Code" maxlength="20">
+      <button class="btn btn-ghost" id="join-group-btn">Beitreten</button>
+    </div>
+  </div>
+</div>
+
+<div id="app-screen" class="app hidden">
+  <header>
+    <div>
+      <div class="brand">POKER<span class="dot"></span>ROYAL</div>
+      <div class="tagline" id="group-title"></div>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-ghost btn-sm" id="back-to-groups">← Gruppen</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="players">Spieler</button>
+    <button class="tab" data-tab="game">Spiel</button>
+    <button class="tab" data-tab="history">Verlauf</button>
+  </div>
+
+  <section id="tab-players">
+    <div class="panel">
+      <div class="panel-title">Neuer Spieler</div>
+      <div class="panel-sub">Name und Telefonnummer (für Twint)</div>
+      <div class="form-row">
+        <input type="text" id="player-name" placeholder="Name z.B. Marco" maxlength="20">
+        <input type="tel" id="player-phone" placeholder="Telefon z.B. 079 123 45 67" maxlength="20">
+        <button class="btn btn-gold" id="add-player-btn">Hinzufügen</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Spielerliste</div>
+      <div class="panel-sub" id="player-count-sub">0 Spieler</div>
+      <div id="player-list"></div>
+    </div>
+  </section>
+
+  <section id="tab-game" class="hidden">
+    <div id="no-game-view" class="panel">
+      <div class="panel-title">Spiel planen</div>
+      <div class="panel-sub">Datum festlegen und Spieler auswählen</div>
+      <div class="form-row">
+        <input type="date" id="game-date">
+        <input type="text" id="game-location" placeholder="Ort z.B. Bei Marco">
+      </div>
+      <div style="margin-top: 20px;">
+        <div class="stat-label">Teilnehmer auswählen</div>
+        <div class="player-pills" id="game-player-pills"></div>
+      </div>
+      <div style="margin-top: 16px;">
+        <button class="btn btn-gold" id="start-game-btn">Spiel starten</button>
+      </div>
+    </div>
+
+    <div id="active-game-view" class="hidden">
+      <div class="game-status">
+        <div class="status-dot"></div>
+        <div class="status-text">Aktives Spiel · <strong id="active-date"></strong> · Pot: <strong id="active-pot">0.00 CHF</strong></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Buy-In & Cash-Out</div>
+        <div class="panel-sub">Einsatz pro Spieler + Endstand</div>
+        <div class="game-header-row">
+          <div></div><div>Spieler</div><div>Buy-In</div><div class="cashout-cell">Cash-Out</div><div class="net-cell">Netto</div>
+        </div>
+        <div class="game-grid" id="game-grid"></div>
+        <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+          <button class="btn btn-gold" id="settle-btn">Abrechnen</button>
+          <button class="btn btn-ghost btn-sm" id="balance-btn" title="Cashouts proportional anpassen">Chips ausgleichen</button>
+          <button class="btn btn-danger btn-sm" id="cancel-game-btn">Spiel abbrechen</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settlement-view" class="hidden">
+      <div class="panel">
+        <div class="panel-title">Abrechnung</div>
+        <div class="panel-sub" id="settle-sub"></div>
+        <div id="settle-warn"></div>
+        <div id="settle-list"></div>
+        <div id="settle-balanced" class="empty-state hidden" style="margin-top: 12px;">
+          Alles ausgeglichen — niemand schuldet jemandem etwas.
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap;">
+          <button class="btn btn-gold" id="save-game-btn">Spiel speichern & beenden</button>
+          <button class="btn btn-ghost" id="back-to-game-btn">Zurück</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-history" class="hidden">
+    <div class="panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
+        <div>
+          <div class="panel-title">All-Time Rangliste</div>
+          <div class="panel-sub" id="history-sub">Noch keine Spiele</div>
+        </div>
+        <select id="history-filter" style="max-width: 200px;">
+          <option value="all">Alle Zeiten</option>
+        </select>
+      </div>
+      <div class="stat-grid" id="overall-stats"></div>
+      <div id="ranking-list"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Spielverlauf</div>
+      <div class="panel-sub">Vergangene Spiele</div>
+      <div id="history-list"></div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+
+const isConfigured = SUPABASE_URL !== 'https://YOUR-PROJECT.supabase.co' && SUPABASE_ANON_KEY !== 'YOUR-ANON-KEY';
+if (!isConfigured) document.getElementById('config-warn').classList.remove('hidden');
+
+const sb = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+const state = { user: null, groups: [], currentGroup: null, players: [], activeGame: null, history: [] };
+
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => (Math.round((n || 0) * 100) / 100).toFixed(2);
+const initials = (name) => (name || '').trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
+const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2400); }
+function showScreen(name) { ['login-screen','groups-screen','app-screen'].forEach(s => $(s).classList.toggle('hidden', s !== name)); }
+
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    state.user = session.user;
+    $('user-email').textContent = session.user.email;
+    await loadGroups();
+    showScreen('groups-screen');
+  } else {
+    showScreen('login-screen');
+  }
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      state.user = session.user;
+      $('user-email').textContent = session.user.email;
+      await loadGroups();
+      showScreen('groups-screen');
+      if (window.location.hash) history.replaceState(null, '', window.location.pathname);
+    } else if (event === 'SIGNED_OUT') {
+      state.user = null; state.currentGroup = null;
+      showScreen('login-screen');
+    }
+  });
+}
+
+$('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('login-email').value.trim();
+  if (!email) return;
+  $('login-btn').disabled = true;
+  $('login-msg').classList.add('hidden');
+  $('login-err').classList.add('hidden');
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href.split('#')[0].split('?')[0] }
+  });
+  $('login-btn').disabled = false;
+  if (error) {
+    $('login-err').textContent = error.message;
+    $('login-err').classList.remove('hidden');
+  } else {
+    $('login-msg').textContent = 'Magic Link gesendet. Schau in dein Postfach.';
+    $('login-msg').classList.remove('hidden');
+  }
+});
+
+$('logout-btn').addEventListener('click', async () => { await sb.auth.signOut(); });
+
+async function loadGroups() {
+  const { data, error } = await sb.from('group_members').select('groups(id, name, invite_code)').eq('user_id', state.user.id);
+  if (error) { toast(error.message); return; }
+  state.groups = (data || []).map(r => r.groups).filter(Boolean);
+  renderGroups();
+}
+
+function renderGroups() {
+  const list = $('groups-list');
+  list.innerHTML = '';
+  $('groups-sub').textContent = state.groups.length === 0 ? 'Noch keine Gruppe' : `${state.groups.length} Gruppe${state.groups.length === 1 ? '' : 'n'}`;
+  if (state.groups.length === 0) {
+    list.innerHTML = '<div class="empty-state">Erstelle oder tritt einer Gruppe bei</div>';
+    return;
+  }
+  state.groups.forEach(g => {
+    const row = document.createElement('div');
+    row.className = 'group-row';
+    row.innerHTML = `
+      <div class="avatar">${esc(initials(g.name))}</div>
+      <div>
+        <div class="group-name">${esc(g.name)}</div>
+        <div class="group-code">Code: ${esc(g.invite_code)}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-copy="${esc(g.invite_code)}">Code kopieren</button>
+      <button class="btn btn-gold btn-sm" data-open="${g.id}">Öffnen</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openGroup(b.dataset.open)));
+  list.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.copy); toast('Code kopiert'); } catch {}
+  }));
+}
+
+$('create-group-btn').addEventListener('click', async () => {
+  const name = $('new-group-name').value.trim();
+  if (!name) { toast('Name fehlt'); return; }
+  const { error } = await sb.from('groups').insert({ name, owner_id: state.user.id }).select().single();
+  if (error) { toast(error.message); return; }
+  $('new-group-name').value = '';
+  await loadGroups();
+  toast('Gruppe erstellt');
+});
+
+$('join-group-btn').addEventListener('click', async () => {
+  const code = $('join-code').value.trim();
+  if (!code) { toast('Code fehlt'); return; }
+  const { error } = await sb.rpc('join_group_by_code', { code });
+  if (error) { toast(error.message); return; }
+  $('join-code').value = '';
+  await loadGroups();
+  toast('Gruppe beigetreten');
+});
+
+async function openGroup(groupId) {
+  const g = state.groups.find(x => x.id === groupId);
+  if (!g) return;
+  state.currentGroup = g;
+  $('group-title').textContent = `${g.name} · Code: ${g.invite_code}`;
+  await loadGroupData();
+  showScreen('app-screen');
+  switchTab('players');
+}
+
+$('back-to-groups').addEventListener('click', () => {
+  state.currentGroup = null;
+  showScreen('groups-screen');
+});
+
+async function loadGroupData() {
+  const gid = state.currentGroup.id;
+  const [{ data: ps }, { data: gs }] = await Promise.all([
+    sb.from('players').select('*').eq('group_id', gid).order('created_at'),
+    sb.from('games').select('*, game_participants(*, players(*))').eq('group_id', gid).order('date', { ascending: false }),
+  ]);
+  state.players = ps || [];
+  const games = gs || [];
+  state.activeGame = games.find(g => g.phase !== 'done') || null;
+  state.history = games.filter(g => g.phase === 'done');
+  renderPlayers();
+  renderGame();
+  renderHistory();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  ['players','game','history'].forEach(n => $('tab-' + n).classList.toggle('hidden', n !== name));
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+function renderPlayers() {
+  const list = $('player-list');
+  list.innerHTML = '';
+  $('player-count-sub').textContent = `${state.players.length} Spieler`;
+  if (state.players.length === 0) {
+    list.innerHTML = '<div class="empty-state">Noch keine Spieler</div>';
+    return;
+  }
+  state.players.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    row.innerHTML = `
+      <div class="avatar">${esc(initials(p.name))}</div>
+      <div class="player-name">${esc(p.name)}</div>
+      <div class="player-handle">${esc(p.phone || '—')}</div>
+      <button class="btn btn-danger btn-sm" data-remove="${p.id}">Entfernen</button>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('[data-remove]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('Spieler entfernen?')) return;
+    const { error } = await sb.from('players').delete().eq('id', b.dataset.remove);
+    if (error) { toast(error.message); return; }
+    await loadGroupData();
+  }));
+}
+
+$('add-player-btn').addEventListener('click', async () => {
+  const name = $('player-name').value.trim();
+  const phone = $('player-phone').value.trim();
+  if (!name) { toast('Name fehlt'); return; }
+  const { error } = await sb.from('players').insert({ group_id: state.currentGroup.id, name, phone: phone || null });
+  if (error) { toast(error.message); return; }
+  $('player-name').value = ''; $('player-phone').value = '';
+  await loadGroupData();
+});
+
+const selectedParticipants = new Set();
+
+function renderGame() {
+  if (state.activeGame && state.activeGame.phase === 'settled') {
+    $('no-game-view').classList.add('hidden');
+    $('active-game-view').classList.add('hidden');
+    $('settlement-view').classList.remove('hidden');
+    renderSettlement();
+  } else if (state.activeGame) {
+    $('no-game-view').classList.add('hidden');
+    $('active-game-view').classList.remove('hidden');
+    $('settlement-view').classList.add('hidden');
+    renderActiveGame();
+  } else {
+    $('no-game-view').classList.remove('hidden');
+    $('active-game-view').classList.add('hidden');
+    $('settlement-view').classList.add('hidden');
+    if (!$('game-date').value) $('game-date').value = new Date().toISOString().slice(0, 10);
+    renderPlayerPills();
+  }
+}
+
+function renderPlayerPills() {
+  const wrap = $('game-player-pills');
+  wrap.innerHTML = '';
+  if (state.players.length === 0) {
+    wrap.innerHTML = '<div class="empty-state" style="width:100%;">Zuerst Spieler anlegen</div>';
+    return;
+  }
+  state.players.forEach(p => {
+    const pill = document.createElement('div');
+    pill.className = 'player-pill' + (selectedParticipants.has(p.id) ? ' selected' : '');
+    pill.textContent = p.name;
+    pill.addEventListener('click', () => {
+      if (selectedParticipants.has(p.id)) selectedParticipants.delete(p.id);
+      else selectedParticipants.add(p.id);
+      renderPlayerPills();
+    });
+    wrap.appendChild(pill);
+  });
+}
+
+$('start-game-btn').addEventListener('click', async () => {
+  if (selectedParticipants.size < 2) { toast('Mindestens 2 Spieler'); return; }
+  const date = $('game-date').value;
+  if (!date) { toast('Datum fehlt'); return; }
+  const { data: game, error } = await sb.from('games').insert({
+    group_id: state.currentGroup.id, date,
+    location: $('game-location').value.trim() || null, phase: 'playing',
+  }).select().single();
+  if (error) { toast(error.message); return; }
+  const inserts = Array.from(selectedParticipants).map(pid => ({ game_id: game.id, player_id: pid, buy_in: 0, cash_out: null }));
+  const { error: e2 } = await sb.from('game_participants').insert(inserts);
+  if (e2) { toast(e2.message); return; }
+  selectedParticipants.clear();
+  $('game-location').value = '';
+  await loadGroupData();
+});
+
+function renderActiveGame() {
+  const g = state.activeGame;
+  $('active-date').textContent = fmtDate(g.date) + (g.location ? ' · ' + g.location : '');
+  const grid = $('game-grid');
+  grid.innerHTML = '';
+  let totalBuy = 0;
+  g.game_participants.forEach(part => {
+    const buy = part.buy_in || 0;
+    const cash = part.cash_out;
+    const net = (cash !== null && cash !== undefined) ? cash - buy : null;
+    totalBuy += buy;
+    const row = document.createElement('div');
+    row.className = 'game-player-row';
+    row.innerHTML = `
+      <div class="avatar">${esc(initials(part.players.name))}</div>
+      <div><span class="player-name">${esc(part.players.name)}</span></div>
+      <input type="number" step="0.01" min="0" placeholder="0.00" value="${buy || ''}" data-pid="${part.player_id}" data-field="buy_in">
+      <input class="cashout-cell" type="number" step="0.01" min="0" placeholder="0.00" value="${cash != null ? cash : ''}" data-pid="${part.player_id}" data-field="cash_out">
+      <div class="net-cell stat-value ${net > 0 ? 'stat-win' : net < 0 ? 'stat-loss' : ''}">${net !== null ? (net > 0 ? '+' : '') + fmt(net) : '—'}</div>
+    `;
+    grid.appendChild(row);
+  });
+  $('active-pot').textContent = fmt(totalBuy) + ' CHF';
+
+  let saveTimer = null;
+  grid.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const pid = e.target.dataset.pid;
+      const field = e.target.dataset.field;
+      const v = e.target.value;
+      const num = v === '' ? null : parseFloat(v);
+      const part = g.game_participants.find(p => p.player_id === pid);
+      part[field] = num === null ? (field === 'buy_in' ? 0 : null) : num;
+      const tb = g.game_participants.reduce((s, p) => s + (p.buy_in || 0), 0);
+      $('active-pot').textContent = fmt(tb) + ' CHF';
+      const buy = part.buy_in || 0;
+      const cash = part.cash_out;
+      const net = (cash !== null && cash !== undefined) ? cash - buy : null;
+      const netCell = inp.closest('.game-player-row').querySelector('.net-cell');
+      netCell.className = 'net-cell stat-value ' + (net > 0 ? 'stat-win' : net < 0 ? 'stat-loss' : '');
+      netCell.textContent = net !== null ? (net > 0 ? '+' : '') + fmt(net) : '—';
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        const updateVal = field === 'buy_in' ? (num || 0) : num;
+        await sb.from('game_participants').update({ [field]: updateVal }).eq('game_id', g.id).eq('player_id', pid);
+      }, 400);
+    });
+  });
+}
+
+$('cancel-game-btn').addEventListener('click', async () => {
+  if (!confirm('Spiel abbrechen? Daten gehen verloren.')) return;
+  await sb.from('games').delete().eq('id', state.activeGame.id);
+  await loadGroupData();
+});
+
+$('balance-btn').addEventListener('click', async () => {
+  const g = state.activeGame;
+  const totalBuy = g.game_participants.reduce((s, p) => s + (p.buy_in || 0), 0);
+  const totalCash = g.game_participants.reduce((s, p) => s + (p.cash_out || 0), 0);
+  if (totalBuy === 0) { toast('Zuerst Buy-Ins eintragen'); return; }
+  if (totalCash === 0) { toast('Zuerst Cashouts eintragen'); return; }
+  if (Math.abs(totalBuy - totalCash) < 0.01) { toast('Bereits ausgeglichen'); return; }
+  if (!confirm(`Differenz: ${fmt(totalBuy - totalCash)} CHF. Proportional ausgleichen?`)) return;
+  const factor = totalBuy / totalCash;
+  for (const p of g.game_participants) {
+    if (p.cash_out !== null && p.cash_out !== undefined) {
+      const v = Math.round(p.cash_out * factor * 100) / 100;
+      await sb.from('game_participants').update({ cash_out: v }).eq('game_id', g.id).eq('player_id', p.player_id);
+    }
+  }
+  await loadGroupData();
+  toast('Cashouts ausgeglichen');
+});
+
+$('settle-btn').addEventListener('click', async () => {
+  const g = state.activeGame;
+  const missing = g.game_participants.filter(p => p.cash_out === null || p.cash_out === undefined);
+  if (missing.length > 0) {
+    if (!confirm(`${missing.length} Cashouts fehlen. Mit 0 rechnen?`)) return;
+    for (const p of missing) {
+      await sb.from('game_participants').update({ cash_out: 0 }).eq('game_id', g.id).eq('player_id', p.player_id);
+    }
+  }
+  await sb.from('games').update({ phase: 'settled' }).eq('id', g.id);
+  await loadGroupData();
+});
+
+$('back-to-game-btn').addEventListener('click', async () => {
+  await sb.from('games').update({ phase: 'playing' }).eq('id', state.activeGame.id);
+  await loadGroupData();
+});
+
+$('save-game-btn').addEventListener('click', async () => {
+  await sb.from('games').update({ phase: 'done' }).eq('id', state.activeGame.id);
+  toast('Spiel gespeichert');
+  await loadGroupData();
+});
+
+function computeSettlement(parts) {
+  const balances = parts.map(p => ({
+    id: p.player_id, name: p.players.name, phone: p.players.phone,
+    net: (p.cash_out || 0) - (p.buy_in || 0),
+  }));
+  const debtors = balances.filter(b => b.net < -0.01).map(b => ({...b})).sort((a, b) => a.net - b.net);
+  const creditors = balances.filter(b => b.net > 0.01).map(b => ({...b})).sort((a, b) => b.net - a.net);
+  const txs = [];
+  let i = 0, j = 0;
+  while (i < debtors.length && j < creditors.length) {
+    const amount = Math.min(-debtors[i].net, creditors[j].net);
+    txs.push({ from: debtors[i].name, to: creditors[j].name, toPhone: creditors[j].phone, amount });
+    debtors[i].net += amount;
+    creditors[j].net -= amount;
+    if (Math.abs(debtors[i].net) < 0.01) i++;
+    if (Math.abs(creditors[j].net) < 0.01) j++;
+  }
+  return txs;
+}
+
+function renderSettlement() {
+  const g = state.activeGame;
+  const txs = computeSettlement(g.game_participants);
+  const totalPot = g.game_participants.reduce((s, p) => s + (p.buy_in || 0), 0);
+  const totalCash = g.game_participants.reduce((s, p) => s + (p.cash_out || 0), 0);
+  $('settle-sub').textContent = `${fmtDate(g.date)} · Pot: ${fmt(totalPot)} CHF · Ausgezahlt: ${fmt(totalCash)} CHF`;
+
+  $('settle-warn').innerHTML = Math.abs(totalPot - totalCash) > 0.01 ? `
+    <div class="game-status" style="background: rgba(248,113,113,0.1); border-color: var(--loss); margin-bottom: 16px;">
+      <div class="status-dot" style="background: var(--loss); box-shadow: 0 0 12px var(--loss);"></div>
+      <div class="status-text">Differenz: ${fmt(totalPot - totalCash)} CHF — eventuell zurück und Chips ausgleichen</div>
+    </div>` : '';
+
+  const list = $('settle-list');
+  list.innerHTML = '';
+  if (txs.length === 0) {
+    $('settle-balanced').classList.remove('hidden');
+  } else {
+    $('settle-balanced').classList.add('hidden');
+    txs.forEach(t => {
+      const phoneHtml = t.toPhone ? `<a href="tel:${esc(t.toPhone.replace(/\s/g,''))}" class="settle-phone">${esc(t.toPhone)}</a>` : '';
+      const card = document.createElement('div');
+      card.className = 'settle-card';
+      card.innerHTML = `
+        <span class="settle-from">${esc(t.from)}</span>
+        <span class="settle-arrow">→</span>
+        <div class="settle-to-wrap">
+          <div class="settle-to">${esc(t.to)}</div>
+          ${phoneHtml}
+        </div>
+        <span class="settle-amount">${fmt(t.amount)} CHF</span>
+      `;
+      list.appendChild(card);
+    });
+  }
+}
+
+let historyFilter = 'all';
+
+function rebuildFilterOptions() {
+  const sel = $('history-filter');
+  const current = sel.value || 'all';
+  const months = new Set();
+  state.history.forEach(g => months.add(g.date.slice(0, 7)));
+  const sorted = Array.from(months).sort().reverse();
+  const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  sel.innerHTML = '<option value="all">Alle Zeiten</option>'
+    + '<option value="thismonth">Dieser Monat</option>'
+    + '<option value="thisyear">Dieses Jahr</option>'
+    + sorted.map(ym => {
+        const [y, m] = ym.split('-');
+        return `<option value="${ym}">${monthNames[parseInt(m)-1]} ${y}</option>`;
+      }).join('');
+  sel.value = current;
+}
+
+function getFiltered() {
+  if (historyFilter === 'all') return state.history;
+  const now = new Date();
+  if (historyFilter === 'thismonth') return state.history.filter(g => g.date.startsWith(now.toISOString().slice(0, 7)));
+  if (historyFilter === 'thisyear') return state.history.filter(g => g.date.startsWith(String(now.getFullYear())));
+  return state.history.filter(g => g.date.startsWith(historyFilter));
+}
+
+$('history-filter').addEventListener('change', (e) => {
+  historyFilter = e.target.value;
+  renderHistory();
+});
+
+function renderHistory() {
+  rebuildFilterOptions();
+  const filtered = getFiltered();
+
+  const totals = {};
+  filtered.forEach(g => {
+    g.game_participants.forEach(r => {
+      const net = (r.cash_out || 0) - (r.buy_in || 0);
+      const key = r.player_id;
+      if (!totals[key]) totals[key] = { name: r.players.name, net: 0, games: 0, biggestWin: 0, biggestLoss: 0 };
+      totals[key].net += net;
+      totals[key].games += 1;
+      if (net > totals[key].biggestWin) totals[key].biggestWin = net;
+      if (net < totals[key].biggestLoss) totals[key].biggestLoss = net;
+    });
+  });
+  const ranking = Object.values(totals).sort((a, b) => b.net - a.net);
+
+  $('history-sub').textContent = filtered.length === 0 ? 'Keine Spiele in diesem Zeitraum' : `${filtered.length} Spiel${filtered.length === 1 ? '' : 'e'}`;
+
+  const totalPot = filtered.reduce((s, g) => s + g.game_participants.reduce((ss, r) => ss + (r.buy_in || 0), 0), 0);
+  const biggestWin = Math.max(0, ...Object.values(totals).map(t => t.biggestWin));
+  const biggestLoss = Math.min(0, ...Object.values(totals).map(t => t.biggestLoss));
+
+  $('overall-stats').innerHTML = filtered.length === 0 ? '' : `
+    <div class="stat-tile"><div class="num">${filtered.length}</div><div class="lbl">Spiele</div></div>
+    <div class="stat-tile"><div class="num">${fmt(totalPot)}</div><div class="lbl">Total Pot · CHF</div></div>
+    <div class="stat-tile"><div class="num stat-win">+${fmt(biggestWin)}</div><div class="lbl">Grösster Gewinn</div></div>
+    <div class="stat-tile"><div class="num stat-loss">${fmt(biggestLoss)}</div><div class="lbl">Grösster Verlust</div></div>
+  `;
+
+  const rankList = $('ranking-list');
+  rankList.innerHTML = '';
+  ranking.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'ranking-row';
+    row.innerHTML = `
+      <div class="rank ${i === 0 ? 'rank-1' : ''}">${i + 1}</div>
+      <div class="avatar">${esc(initials(p.name))}</div>
+      <div>
+        <div class="player-name">${esc(p.name)}</div>
+        <div class="games-played">${p.games} Spiel${p.games === 1 ? '' : 'e'}</div>
+      </div>
+      <div class="all-time-amount ${p.net > 0 ? 'stat-win' : p.net < 0 ? 'stat-loss' : ''}">${p.net > 0 ? '+' : ''}${fmt(p.net)}</div>
+      <div style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;">CHF</div>
+    `;
+    rankList.appendChild(row);
+  });
+
+  const histList = $('history-list');
+  histList.innerHTML = '';
+  if (filtered.length === 0) {
+    histList.innerHTML = '<div class="empty-state">Keine Spiele in diesem Zeitraum</div>';
+    return;
+  }
+  filtered.forEach(g => {
+    const pot = g.game_participants.reduce((s, r) => s + (r.buy_in || 0), 0);
+    const results = [...g.game_participants].sort((a, b) => ((b.cash_out||0)-(b.buy_in||0)) - ((a.cash_out||0)-(a.buy_in||0)));
+    const card = document.createElement('div');
+    card.className = 'history-game';
+    const resultsHtml = results.map(r => {
+      const net = (r.cash_out||0) - (r.buy_in||0);
+      return `<div class="history-result"><span style="color: var(--muted);">${esc(r.players.name)}</span> <span class="${net > 0 ? 'stat-win' : net < 0 ? 'stat-loss' : ''}">${net > 0 ? '+' : ''}${fmt(net)}</span></div>`;
+    }).join('');
+    card.innerHTML = `
+      <div class="history-game-head">
+        <div class="history-date">${fmtDate(g.date)}${g.location ? ' · ' + esc(g.location) : ''}</div>
+        <div class="history-pot">Pot: ${fmt(pot)} CHF</div>
+      </div>
+      <div class="history-results">${resultsHtml}</div>
+    `;
+    histList.appendChild(card);
+  });
+}
+
+if (isConfigured) initAuth();
+</script>
+</body>
+</html>
