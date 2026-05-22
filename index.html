@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <style>
   :root {
     --felt-deep: #0b1220;
@@ -225,6 +226,18 @@
   .config-warn h2 { margin-bottom: 12px; color: var(--loss); }
   .config-warn code { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; }
 
+  .game-timer {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--gold);
+    font-size: 15px; letter-spacing: 0.08em; margin-left: auto;
+  }
+  .chart-wrap {
+    margin-bottom: 24px; position: relative; height: 280px;
+    background: rgba(0,0,0,0.15); border: 1px solid var(--felt-border); border-radius: 10px; padding: 16px;
+  }
+  .history-duration {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+    padding: 2px 8px; background: rgba(0,0,0,0.25); border-radius: 4px;
+  }
   @media (max-width: 640px) {
     header { flex-direction: column; align-items: flex-start; }
     .form-row { grid-template-columns: 1fr; }
@@ -345,6 +358,7 @@
       <div class="game-status">
         <div class="status-dot"></div>
         <div class="status-text">Aktives Spiel · <strong id="active-date"></strong> · Pot: <strong id="active-pot">0.00 CHF</strong></div>
+        <div class="game-timer" id="game-timer">00:00</div>
       </div>
       <div class="panel">
         <div class="panel-title">Buy-In & Cash-Out</div>
@@ -390,6 +404,10 @@
         </select>
       </div>
       <div class="stat-grid" id="overall-stats"></div>
+      <div id="chart-container" class="chart-wrap hidden">
+        <div class="stat-label" style="margin-bottom: 12px; margin-top: 0;">Kumulativer Verlauf</div>
+        <canvas id="leaderboard-chart"></canvas>
+      </div>
       <div id="ranking-list"></div>
     </div>
     <div class="panel">
@@ -412,6 +430,8 @@ if (!isConfigured) document.getElementById('config-warn').classList.remove('hidd
 const sb = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const state = { user: null, groups: [], currentGroup: null, players: [], activeGame: null, history: [] };
+let activeTimerInterval = null;
+let leaderboardChart = null;
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => (Math.round((n || 0) * 100) / 100).toFixed(2);
@@ -420,6 +440,29 @@ const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('de-CH', { day: 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2400); }
 function showScreen(name) { ['login-screen','groups-screen','app-screen'].forEach(s => $(s).classList.toggle('hidden', s !== name)); }
+function fmtDuration(sec) {
+  if (!sec || sec <= 0) return null;
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+function stopGameTimer() {
+  if (activeTimerInterval) { clearInterval(activeTimerInterval); activeTimerInterval = null; }
+}
+function startGameTimer(startIso) {
+  stopGameTimer();
+  const startMs = new Date(startIso).getTime();
+  function tick() {
+    const elapsed = Math.floor((Date.now() - startMs) / 1000);
+    const h = Math.floor(elapsed / 3600);
+    const m = Math.floor((elapsed % 3600) / 60);
+    const s = elapsed % 60;
+    const el = $('game-timer');
+    if (el) el.textContent = (h > 0 ? String(h).padStart(2,'0') + ':' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
+  tick();
+  activeTimerInterval = setInterval(tick, 1000);
+}
 
 async function initAuth() {
   const { data: { session } } = await sb.auth.getSession();
@@ -674,6 +717,7 @@ function renderActiveGame() {
     grid.appendChild(row);
   });
   $('active-pot').textContent = fmt(totalBuy) + ' CHF';
+  startGameTimer(g.created_at);
 
   let saveTimer = null;
   grid.querySelectorAll('input').forEach(inp => {
@@ -703,6 +747,7 @@ function renderActiveGame() {
 
 $('cancel-game-btn').addEventListener('click', async () => {
   if (!confirm('Spiel abbrechen? Daten gehen verloren.')) return;
+  stopGameTimer();
   await sb.from('games').delete().eq('id', state.activeGame.id);
   await loadGroupData();
 });
@@ -745,7 +790,9 @@ $('back-to-game-btn').addEventListener('click', async () => {
 });
 
 $('save-game-btn').addEventListener('click', async () => {
-  await sb.from('games').update({ phase: 'done' }).eq('id', state.activeGame.id);
+  const durationSec = Math.floor((Date.now() - new Date(state.activeGame.created_at).getTime()) / 1000);
+  await sb.from('games').update({ phase: 'done', session_duration_seconds: durationSec }).eq('id', state.activeGame.id);
+  stopGameTimer();
   toast('Spiel gespeichert');
   await loadGroupData();
 });
@@ -807,6 +854,79 @@ function renderSettlement() {
   }
 }
 
+function renderLeaderboardChart(filtered) {
+  const container = $('chart-container');
+  if (filtered.length < 2) {
+    container.classList.add('hidden');
+    if (leaderboardChart) { leaderboardChart.destroy(); leaderboardChart = null; }
+    return;
+  }
+  container.classList.remove('hidden');
+
+  const sortedGames = [...filtered].sort((a, b) => a.date.localeCompare(b.date));
+  const allPlayerIds = [];
+  const playerNames = {};
+  const seen = new Set();
+  sortedGames.forEach(g => g.game_participants.forEach(r => {
+    if (!seen.has(r.player_id)) { seen.add(r.player_id); allPlayerIds.push(r.player_id); }
+    playerNames[r.player_id] = r.players.name;
+  }));
+
+  const cumulative = {};
+  allPlayerIds.forEach(pid => { cumulative[pid] = 0; });
+  const datasetsMap = {};
+  allPlayerIds.forEach(pid => { datasetsMap[pid] = []; });
+
+  sortedGames.forEach(g => {
+    g.game_participants.forEach(r => {
+      cumulative[r.player_id] += (r.cash_out || 0) - (r.buy_in || 0);
+    });
+    allPlayerIds.forEach(pid => datasetsMap[pid].push(Math.round(cumulative[pid] * 100) / 100));
+  });
+
+  const labels = sortedGames.map(g => fmtDate(g.date));
+  const palette = ['#6366f1','#10b981','#ef4444','#fde047','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#84cc16'];
+  const datasets = allPlayerIds.map((pid, i) => ({
+    label: playerNames[pid],
+    data: datasetsMap[pid],
+    borderColor: palette[i % palette.length],
+    backgroundColor: palette[i % palette.length] + '18',
+    borderWidth: 2,
+    tension: 0.35,
+    pointRadius: 4,
+    pointHoverRadius: 6,
+    fill: false,
+  }));
+
+  if (leaderboardChart) { leaderboardChart.destroy(); leaderboardChart = null; }
+  const canvas = $('leaderboard-chart');
+  canvas.style.height = '220px';
+  leaderboardChart = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#94a3b8', font: { family: 'Manrope', size: 12 }, boxWidth: 14 } },
+        tooltip: {
+          callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y >= 0 ? '+' : ''}${fmt(ctx.parsed.y)} CHF` }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 30 },
+          grid: { color: 'rgba(42,54,86,0.5)' }
+        },
+        y: {
+          ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 }, callback: v => (v >= 0 ? '+' : '') + fmt(v) },
+          grid: { color: 'rgba(42,54,86,0.5)' }
+        }
+      }
+    }
+  });
+}
+
 let historyFilter = 'all';
 
 function rebuildFilterOptions() {
@@ -862,13 +982,18 @@ function renderHistory() {
   const totalPot = filtered.reduce((s, g) => s + g.game_participants.reduce((ss, r) => ss + (r.buy_in || 0), 0), 0);
   const biggestWin = Math.max(0, ...Object.values(totals).map(t => t.biggestWin));
   const biggestLoss = Math.min(0, ...Object.values(totals).map(t => t.biggestLoss));
+  const totalSessionSec = filtered.reduce((s, g) => s + (g.session_duration_seconds || 0), 0);
+  const totalTimeStr = fmtDuration(totalSessionSec);
 
   $('overall-stats').innerHTML = filtered.length === 0 ? '' : `
     <div class="stat-tile"><div class="num">${filtered.length}</div><div class="lbl">Spiele</div></div>
     <div class="stat-tile"><div class="num">${fmt(totalPot)}</div><div class="lbl">Total Pot · CHF</div></div>
     <div class="stat-tile"><div class="num stat-win">+${fmt(biggestWin)}</div><div class="lbl">Grösster Gewinn</div></div>
     <div class="stat-tile"><div class="num stat-loss">${fmt(biggestLoss)}</div><div class="lbl">Grösster Verlust</div></div>
+    ${totalTimeStr ? `<div class="stat-tile"><div class="num">${esc(totalTimeStr)}</div><div class="lbl">Gesamt Spielzeit</div></div>` : ''}
   `;
+
+  renderLeaderboardChart(filtered);
 
   const rankList = $('ranking-list');
   rankList.innerHTML = '';
@@ -903,10 +1028,14 @@ function renderHistory() {
       const net = (r.cash_out||0) - (r.buy_in||0);
       return `<div class="history-result"><span style="color: var(--muted);">${esc(r.players.name)}</span> <span class="${net > 0 ? 'stat-win' : net < 0 ? 'stat-loss' : ''}">${net > 0 ? '+' : ''}${fmt(net)}</span></div>`;
     }).join('');
+    const durStr = fmtDuration(g.session_duration_seconds);
     card.innerHTML = `
       <div class="history-game-head">
         <div class="history-date">${fmtDate(g.date)}${g.location ? ' · ' + esc(g.location) : ''}</div>
-        <div class="history-pot">Pot: ${fmt(pot)} CHF</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          ${durStr ? `<span class="history-duration">${esc(durStr)}</span>` : ''}
+          <div class="history-pot">Pot: ${fmt(pot)} CHF</div>
+        </div>
       </div>
       <div class="history-results">${resultsHtml}</div>
     `;

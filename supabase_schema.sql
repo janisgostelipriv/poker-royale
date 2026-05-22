@@ -30,6 +30,7 @@ create table if not exists public.games (
   date date not null,
   location text,
   phase text not null default 'playing',
+  session_duration_seconds integer,
   created_at timestamptz default now()
 );
 
