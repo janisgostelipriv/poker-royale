@@ -739,7 +739,8 @@ function renderActiveGame() {
       clearTimeout(saveTimer);
       saveTimer = setTimeout(async () => {
         const updateVal = field === 'buy_in' ? (num || 0) : num;
-        await sb.from('game_participants').update({ [field]: updateVal }).eq('game_id', g.id).eq('player_id', pid);
+        const { error } = await sb.from('game_participants').update({ [field]: updateVal }).eq('game_id', g.id).eq('player_id', pid);
+        if (error) toast(error.message.includes('JWT') || error.status === 401 ? 'Session abgelaufen — Seite neu laden' : 'Speichern fehlgeschlagen');
       }, 400);
     });
   });
@@ -1042,6 +1043,18 @@ function renderHistory() {
     histList.appendChild(card);
   });
 }
+
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible' || !sb || !state.user) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    state.user = null;
+    state.currentGroup = null;
+    stopGameTimer();
+    showScreen('login-screen');
+    toast('Session abgelaufen — bitte neu anmelden');
+  }
+});
 
 if (isConfigured) initAuth();
 </script>
