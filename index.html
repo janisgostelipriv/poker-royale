@@ -15,9 +15,9 @@
     --felt: #131c30;
     --felt-raised: #1c2742;
     --felt-border: #2a3656;
-    --gold: #6366f1;
-    --gold-dim: #4f46e5;
-    --gold-soft: rgba(99, 102, 241, 0.15);
+    --gold: #22c55e;
+    --gold-dim: #16a34a;
+    --gold-soft: rgba(34, 197, 94, 0.15);
     --cream: #e5e7eb;
     --muted: #94a3b8;
     --win: #10b981;
@@ -29,8 +29,8 @@
     font-family: 'Manrope', sans-serif;
     background: var(--felt-deep);
     background-image:
-      radial-gradient(ellipse at top, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(99, 102, 241, 0.04) 0%, transparent 60%);
+      radial-gradient(ellipse at top, rgba(34, 197, 94, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(34, 197, 94, 0.04) 0%, transparent 60%);
     color: var(--cream);
     min-height: 100vh;
     line-height: 1.5;
@@ -94,7 +94,7 @@
     transition: all 0.2s ease; white-space: nowrap;
   }
   .btn-gold { background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dim) 100%); color: #fff; box-shadow: 0 2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2); }
-  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
   .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .btn-ghost { background: transparent; color: var(--gold); border: 1px solid var(--gold-dim); }
   .btn-ghost:hover { background: var(--gold-soft); }
@@ -238,6 +238,22 @@
     font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
     padding: 2px 8px; background: rgba(0,0,0,0.25); border-radius: 4px;
   }
+  .s1-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    background: linear-gradient(135deg, #fde047, #f59e0b);
+    color: #000; font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    margin-left: 8px; vertical-align: middle; font-family: 'DM Sans', sans-serif;
+    text-transform: uppercase;
+  }
+  .season-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .season-tab {
+    padding: 9px 18px; border-radius: 8px; border: 1px solid var(--felt-border);
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; transition: all 0.2s;
+  }
+  .season-tab.active { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
+  .season-tab:hover:not(.active) { color: var(--cream); }
   @media (max-width: 640px) {
     header { flex-direction: column; align-items: flex-start; }
     .form-row { grid-template-columns: 1fr; }
@@ -393,10 +409,14 @@
   </section>
 
   <section id="tab-history" class="hidden">
+    <div class="season-tabs">
+      <button class="season-tab active" data-season="2">Season 2</button>
+      <button class="season-tab" data-season="1">Season 1 · Archiv</button>
+    </div>
     <div class="panel">
       <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
         <div>
-          <div class="panel-title">All-Time Rangliste</div>
+          <div class="panel-title" id="ranking-title">Season 2 Rangliste</div>
           <div class="panel-sub" id="history-sub">Noch keine Spiele</div>
         </div>
         <select id="history-filter" style="max-width: 200px;">
@@ -432,6 +452,8 @@ const sb = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 const state = { user: null, groups: [], currentGroup: null, players: [], activeGame: null, history: [] };
 let activeTimerInterval = null;
 let leaderboardChart = null;
+let currentSeason = 2;
+let season1ChampId = null;
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => (Math.round((n || 0) * 100) / 100).toFixed(2);
@@ -886,7 +908,7 @@ function renderLeaderboardChart(filtered) {
   });
 
   const labels = sortedGames.map(g => fmtDate(g.date));
-  const palette = ['#6366f1','#10b981','#ef4444','#fde047','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#84cc16'];
+  const palette = ['#22c55e','#6366f1','#ef4444','#fde047','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#84cc16'];
   const datasets = allPlayerIds.map((pid, i) => ({
     label: playerNames[pid],
     data: datasetsMap[pid],
@@ -930,11 +952,29 @@ function renderLeaderboardChart(filtered) {
 
 let historyFilter = 'all';
 
+function computeSeason1Champion() {
+  const s1games = state.history.filter(g => (g.season || 1) === 1);
+  if (s1games.length === 0) { season1ChampId = null; return; }
+  const totals = {};
+  s1games.forEach(g => {
+    g.game_participants.forEach(r => {
+      const net = (r.cash_out || 0) - (r.buy_in || 0);
+      if (!totals[r.player_id]) totals[r.player_id] = 0;
+      totals[r.player_id] += net;
+    });
+  });
+  let champId = null, champNet = -Infinity;
+  Object.entries(totals).forEach(([pid, net]) => {
+    if (net > champNet) { champNet = net; champId = pid; }
+  });
+  season1ChampId = champId;
+}
+
 function rebuildFilterOptions() {
   const sel = $('history-filter');
   const current = sel.value || 'all';
   const months = new Set();
-  state.history.forEach(g => months.add(g.date.slice(0, 7)));
+  state.history.filter(g => (g.season || 1) === currentSeason).forEach(g => months.add(g.date.slice(0, 7)));
   const sorted = Array.from(months).sort().reverse();
   const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   sel.innerHTML = '<option value="all">Alle Zeiten</option>'
@@ -948,11 +988,12 @@ function rebuildFilterOptions() {
 }
 
 function getFiltered() {
-  if (historyFilter === 'all') return state.history;
+  const bySeason = state.history.filter(g => (g.season || 1) === currentSeason);
+  if (historyFilter === 'all') return bySeason;
   const now = new Date();
-  if (historyFilter === 'thismonth') return state.history.filter(g => g.date.startsWith(now.toISOString().slice(0, 7)));
-  if (historyFilter === 'thisyear') return state.history.filter(g => g.date.startsWith(String(now.getFullYear())));
-  return state.history.filter(g => g.date.startsWith(historyFilter));
+  if (historyFilter === 'thismonth') return bySeason.filter(g => g.date.startsWith(now.toISOString().slice(0, 7)));
+  if (historyFilter === 'thisyear') return bySeason.filter(g => g.date.startsWith(String(now.getFullYear())));
+  return bySeason.filter(g => g.date.startsWith(historyFilter));
 }
 
 $('history-filter').addEventListener('change', (e) => {
@@ -960,7 +1001,18 @@ $('history-filter').addEventListener('change', (e) => {
   renderHistory();
 });
 
+document.querySelectorAll('.season-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentSeason = parseInt(btn.dataset.season);
+    document.querySelectorAll('.season-tab').forEach(b => b.classList.toggle('active', b === btn));
+    historyFilter = 'all';
+    renderHistory();
+  });
+});
+
 function renderHistory() {
+  computeSeason1Champion();
+  if ($('ranking-title')) $('ranking-title').textContent = `Season ${currentSeason} Rangliste`;
   rebuildFilterOptions();
   const filtered = getFiltered();
 
@@ -969,7 +1021,7 @@ function renderHistory() {
     g.game_participants.forEach(r => {
       const net = (r.cash_out || 0) - (r.buy_in || 0);
       const key = r.player_id;
-      if (!totals[key]) totals[key] = { name: r.players.name, net: 0, games: 0, biggestWin: 0, biggestLoss: 0 };
+      if (!totals[key]) totals[key] = { id: key, name: r.players.name, net: 0, games: 0, biggestWin: 0, biggestLoss: 0 };
       totals[key].net += net;
       totals[key].games += 1;
       if (net > totals[key].biggestWin) totals[key].biggestWin = net;
@@ -999,13 +1051,14 @@ function renderHistory() {
   const rankList = $('ranking-list');
   rankList.innerHTML = '';
   ranking.forEach((p, i) => {
+    const isChamp = season1ChampId && p.id === season1ChampId;
     const row = document.createElement('div');
     row.className = 'ranking-row';
     row.innerHTML = `
       <div class="rank ${i === 0 ? 'rank-1' : ''}">${i + 1}</div>
       <div class="avatar">${esc(initials(p.name))}</div>
       <div>
-        <div class="player-name">${esc(p.name)}</div>
+        <div class="player-name">${esc(p.name)}${isChamp ? '<span class="s1-badge">S1 Champ</span>' : ''}</div>
         <div class="games-played">${p.games} Spiel${p.games === 1 ? '' : 'e'}</div>
       </div>
       <div class="all-time-amount ${p.net > 0 ? 'stat-win' : p.net < 0 ? 'stat-loss' : ''}">${p.net > 0 ? '+' : ''}${fmt(p.net)}</div>
