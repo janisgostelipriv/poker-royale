@@ -265,6 +265,182 @@
     .group-row { grid-template-columns: 40px 1fr; }
     .group-row > *:nth-child(n+3) { display: none; }
   }
+
+  /* ── Tournament Mode ─────────────────────────────── */
+  .trn-phases { display: flex; gap: 3px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 2px; }
+  .trn-phase {
+    flex: 1; min-width: 70px; padding: 10px 6px; text-align: center;
+    background: rgba(0,0,0,0.25); border: 1px solid var(--felt-border);
+    border-radius: 6px; transition: all 0.3s;
+  }
+  .trn-phase.active { background: var(--gold-soft); border-color: var(--gold); }
+  .trn-phase.done { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.25); opacity: 0.7; }
+  .trn-phase-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+  .trn-phase-label { font-size: 11px; font-weight: 700; color: var(--muted); font-family: 'DM Sans', sans-serif; letter-spacing: 0.04em; }
+  .trn-phase.active .trn-phase-label { color: var(--gold); }
+  .trn-phase-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .trn-countdown {
+    font-family: 'JetBrains Mono', monospace; font-size: 86px; font-weight: 700;
+    color: var(--gold); text-align: center; letter-spacing: 0.04em;
+    line-height: 1; padding: 8px 0 4px;
+  }
+  .trn-countdown.is-break { color: #818cf8; }
+  .trn-countdown.warning { color: #f97316; animation: pulse 1s infinite; }
+  .trn-countdown.urgent { color: var(--loss); animation: pulse 0.5s infinite; }
+
+  .trn-level-badge {
+    text-align: center; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .trn-level-badge .current-lvl { color: var(--gold); font-size: 15px; }
+
+  .trn-blinds-row {
+    display: flex; justify-content: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .trn-blind-box {
+    text-align: center; padding: 12px 24px; background: rgba(0,0,0,0.3);
+    border: 1px solid var(--felt-border); border-radius: 10px; min-width: 110px;
+  }
+  .trn-blind-box.next-box { opacity: 0.55; }
+  .trn-blind-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 4px; }
+  .trn-blind-val { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; color: var(--cream); }
+  .trn-blind-val.break-val { color: #818cf8; font-size: 20px; }
+
+  .trn-progress-wrap { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; margin: 10px 0 20px; overflow: hidden; }
+  .trn-progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 3px; transition: width 0.5s linear; }
+
+  .trn-timer-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  .trn-level-row {
+    display: grid; grid-template-columns: 36px 1fr 1fr 100px;
+    gap: 10px; align-items: center; padding: 9px 14px;
+    background: rgba(0,0,0,0.15); border: 1px solid transparent;
+    border-radius: 8px; margin-bottom: 4px;
+  }
+  .trn-level-row.current-row { background: var(--gold-soft); border-color: var(--gold); }
+  .trn-level-row.past-row { opacity: 0.35; }
+  .trn-level-row .lv-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--gold); font-weight: 700; }
+  .trn-level-row .lv-blinds { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cream); }
+  .trn-level-row .lv-sb { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .trn-level-row .lv-dur { font-size: 11px; color: var(--muted); text-align: right; }
+  .trn-level-row.break-row { font-style: italic; }
+  .trn-level-row.break-row .lv-num { color: #818cf8; }
+
+  .trn-prize-tbl { width: 100%; border-collapse: collapse; }
+  .trn-prize-tbl th { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; padding: 0 14px 10px; text-align: left; }
+  .trn-prize-tbl td { padding: 10px 14px; border-top: 1px solid var(--felt-border); font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+  .trn-rank-gold { color: #fde047; font-weight: 700; }
+  .trn-rank-silver { color: #cbd5e1; font-weight: 700; }
+  .trn-rank-bronze { color: #fb923c; font-weight: 700; }
+  .trn-rank-plain { color: var(--cream); font-weight: 600; }
+  .trn-pct { color: var(--muted); }
+  .trn-chf { color: var(--gold); font-weight: 700; }
+  .trn-chf.zero { color: var(--muted); }
+
+  .trn-chip-sets { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .trn-chip-set-lbl { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; color: var(--cream); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; }
+  .trn-chip-row {
+    display: flex; align-items: center; gap: 12px; padding: 8px 12px;
+    background: rgba(0,0,0,0.2); border: 1px solid var(--felt-border); border-radius: 8px; margin-bottom: 6px;
+  }
+  .trn-chip-circle {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; letter-spacing: 0;
+  }
+  .trn-chip-gruen { background: #15803d; color: #fff; border: 3px solid #22c55e; }
+  .trn-chip-schwarz { background: #1e293b; color: #94a3b8; border: 3px solid #475569; }
+  .trn-chip-weiss { background: #f8fafc; color: #0f172a; border: 3px solid #cbd5e1; }
+  .trn-chip-rot { background: #b91c1c; color: #fff; border: 3px solid #ef4444; }
+  .trn-chip-blau { background: #1d4ed8; color: #fff; border: 3px solid #3b82f6; }
+  .trn-chip-val { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--cream); }
+  .trn-chip-count { font-size: 11px; color: var(--muted); }
+
+  .trn-ft-alert {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: rgba(253,224,71,0.1); border: 1px solid rgba(253,224,71,0.35);
+    border-radius: 10px; margin-bottom: 20px;
+  }
+  .trn-ft-alert-icon { font-size: 22px; }
+  .trn-ft-alert-text { font-size: 13px; color: var(--cream); }
+  .trn-ft-alert-text strong { color: #fde047; font-family: 'JetBrains Mono', monospace; }
+
+  .trn-players-ctrl { display: flex; align-items: center; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+  .trn-players-ctrl .stat-label { margin: 0; }
+  .trn-players-big { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--gold); min-width: 50px; text-align: center; }
+
+  @media (max-width: 640px) {
+    .trn-countdown { font-size: 60px; }
+    .trn-chip-sets { grid-template-columns: 1fr; }
+    .trn-level-row { grid-template-columns: 30px 1fr 1fr; }
+    .trn-level-row .lv-dur { display: none; }
+    .trn-blind-val { font-size: 22px; }
+  }
+
+  /* Tournament ranking entry + history */
+  .trn-rank-input-row {
+    display: grid; grid-template-columns: 40px 1fr 1fr 110px; gap: 10px;
+    align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.2);
+    border: 1px solid var(--felt-border); border-radius: 8px; margin-bottom: 6px;
+  }
+  .trn-rank-input-row .rk { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; text-align: center; }
+  .trn-rank-input-row.rk-1 .rk { color: #fde047; }
+  .trn-rank-input-row.rk-2 .rk { color: #cbd5e1; }
+  .trn-rank-input-row.rk-3 .rk { color: #fb923c; }
+  .trn-rank-input-row .prize { font-family: 'JetBrains Mono', monospace; text-align: right; color: var(--gold); font-weight: 700; }
+  .trn-rank-input-row .prize.zero { color: var(--muted); }
+
+  .trn-history-card {
+    padding: 16px 20px; background: rgba(0,0,0,0.2); border: 1px solid var(--felt-border);
+    border-radius: 10px; margin-bottom: 10px;
+  }
+  .trn-history-head {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .trn-history-title { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 15px; color: var(--cream); letter-spacing: 0.04em; }
+  .trn-history-meta { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .trn-history-pot { font-size: 12px; color: var(--gold); font-family: 'JetBrains Mono', monospace; }
+
+  .trn-result-row {
+    display: grid; grid-template-columns: 34px 1fr auto; gap: 12px;
+    align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.2);
+    border: 1px solid var(--felt-border); border-radius: 8px; margin-bottom: 4px;
+  }
+  .trn-result-row.winner {
+    background: linear-gradient(90deg, rgba(253,224,71,0.12), rgba(0,0,0,0.2));
+    border-color: rgba(253,224,71,0.4);
+  }
+  .trn-result-row .rk-badge { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 14px; text-align: center; color: var(--muted); }
+  .trn-result-row.winner .rk-badge { color: #fde047; font-size: 18px; }
+  .trn-result-row .pname { font-weight: 600; font-size: 14px; }
+  .trn-result-row .prize-cell { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--gold); }
+  .trn-result-row .prize-cell.zero { color: var(--muted); }
+
+  .trn-champ-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 4px;
+    background: linear-gradient(135deg, #fde047, #f59e0b);
+    color: #0f172a; font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    margin-left: 8px; vertical-align: middle; font-family: 'DM Sans', sans-serif;
+    text-transform: uppercase;
+  }
+
+  .history-subtabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .history-subtab {
+    padding: 8px 16px; border-radius: 8px; border: 1px solid var(--felt-border);
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s;
+  }
+  .history-subtab.active { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
+
+  @media (max-width: 640px) {
+    .trn-rank-input-row { grid-template-columns: 30px 1fr 100px; }
+    .trn-rank-input-row > input[data-fld="phone"] { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -334,6 +510,7 @@
     <button class="tab active" data-tab="players">Spieler</button>
     <button class="tab" data-tab="game">Spiel</button>
     <button class="tab" data-tab="history">Verlauf</button>
+    <button class="tab" data-tab="tournament">🏆 Turnier</button>
   </div>
 
   <section id="tab-players">
@@ -413,28 +590,157 @@
       <button class="season-tab active" data-season="2">Season 2</button>
       <button class="season-tab" data-season="1">Season 1 · Archiv</button>
     </div>
-    <div class="panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
-        <div>
-          <div class="panel-title" id="ranking-title">Season 2 Rangliste</div>
-          <div class="panel-sub" id="history-sub">Noch keine Spiele</div>
+    <div class="history-subtabs">
+      <button class="history-subtab active" data-subtab="cash">Cash Games</button>
+      <button class="history-subtab" data-subtab="tourneys">🏆 Turniere</button>
+    </div>
+
+    <div id="history-cash">
+      <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
+          <div>
+            <div class="panel-title" id="ranking-title">Season 2 Rangliste</div>
+            <div class="panel-sub" id="history-sub">Noch keine Spiele</div>
+          </div>
+          <select id="history-filter" style="max-width: 200px;">
+            <option value="all">Alle Zeiten</option>
+          </select>
         </div>
-        <select id="history-filter" style="max-width: 200px;">
-          <option value="all">Alle Zeiten</option>
-        </select>
+        <div class="stat-grid" id="overall-stats"></div>
+        <div id="chart-container" class="chart-wrap hidden">
+          <div class="stat-label" style="margin-bottom: 12px; margin-top: 0;">Kumulativer Verlauf</div>
+          <canvas id="leaderboard-chart"></canvas>
+        </div>
+        <div id="ranking-list"></div>
       </div>
-      <div class="stat-grid" id="overall-stats"></div>
-      <div id="chart-container" class="chart-wrap hidden">
-        <div class="stat-label" style="margin-bottom: 12px; margin-top: 0;">Kumulativer Verlauf</div>
-        <canvas id="leaderboard-chart"></canvas>
+      <div class="panel">
+        <div class="panel-title">Spielverlauf</div>
+        <div class="panel-sub">Vergangene Spiele</div>
+        <div id="history-list"></div>
       </div>
-      <div id="ranking-list"></div>
     </div>
+
+    <div id="history-tourneys" class="hidden">
+      <div class="panel">
+        <div class="panel-title">Turnier-Champions</div>
+        <div class="panel-sub" id="trn-champs-sub">Bisherige Turniersieger dieser Season</div>
+        <div id="trn-champs-list"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Turnier-Verlauf</div>
+        <div class="panel-sub" id="trn-history-sub">Alle gespielten Turniere</div>
+        <div id="trn-history-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TOURNAMENT MODE ──────────────────────────── -->
+  <section id="tab-tournament" class="hidden">
+
+    <!-- Config Panel -->
     <div class="panel">
-      <div class="panel-title">Spielverlauf</div>
-      <div class="panel-sub">Vergangene Spiele</div>
-      <div id="history-list"></div>
+      <div class="panel-title">Turnier-Konfiguration</div>
+      <div class="panel-sub">Einstellungen für das laufende Turnier</div>
+      <div class="form-row">
+        <input type="text" id="trn-name" placeholder="Turniername">
+        <input type="text" id="trn-location" placeholder="Ort">
+      </div>
+      <div class="form-row">
+        <input type="date" id="trn-date">
+        <input type="time" id="trn-time">
+      </div>
+      <div class="form-row">
+        <input type="number" id="trn-buyin" placeholder="Buy-In (CHF)" min="1" step="1">
+        <input type="number" id="trn-rebuy-amt" placeholder="Rebuy (CHF)" min="0" step="1">
+        <input type="number" id="trn-maxrebuys" placeholder="Max. Rebuys" min="0" step="1">
+      </div>
+      <div class="form-row">
+        <input type="number" id="trn-playercount" placeholder="Anzahl Spieler" min="2" step="1">
+        <input type="number" id="trn-rebuysused" placeholder="Genutzte Rebuys" min="0" step="1">
+        <button class="btn btn-gold" id="trn-save-btn">Übernehmen</button>
+      </div>
     </div>
+
+    <!-- Live Overview -->
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+          <div class="panel-title" id="trn-live-name">—</div>
+          <div class="panel-sub" id="trn-live-sub">—</div>
+        </div>
+        <div class="game-status" style="margin:0;padding:10px 16px;">
+          <div class="status-dot"></div>
+          <div class="status-text">Pott: <strong id="trn-live-pot">0 CHF</strong></div>
+        </div>
+      </div>
+
+      <!-- Final Table alert (hidden by default) -->
+      <div class="trn-ft-alert hidden" id="trn-ft-alert">
+        <div class="trn-ft-alert-icon">🏆</div>
+        <div class="trn-ft-alert-text"><strong>Final Table!</strong> Nur noch <strong id="trn-ft-count">8</strong> Spieler — beide Tische zusammenlegen.</div>
+      </div>
+
+      <!-- Phase steps -->
+      <div class="trn-phases" id="trn-phases"></div>
+
+      <!-- Stats tiles -->
+      <div class="stat-grid" id="trn-stats"></div>
+
+      <!-- Players remaining control -->
+      <div class="trn-players-ctrl">
+        <span class="stat-label">Verbleibende Spieler</span>
+        <button class="btn btn-ghost btn-sm" id="trn-players-dec">−</button>
+        <span class="trn-players-big" id="trn-players-count">—</span>
+        <button class="btn btn-ghost btn-sm" id="trn-players-inc">+</button>
+      </div>
+    </div>
+
+    <!-- Blind Timer -->
+    <div class="panel">
+      <div class="panel-title">Blind-Timer</div>
+      <div class="trn-level-badge" id="trn-level-badge">Level —</div>
+      <div class="trn-blinds-row" id="trn-blinds-row"></div>
+      <div class="trn-countdown" id="trn-countdown">00:00</div>
+      <div class="trn-progress-wrap"><div class="trn-progress-bar" id="trn-progress"></div></div>
+      <div class="trn-timer-btns">
+        <button class="btn btn-gold" id="trn-timer-toggle">▶ Start</button>
+        <button class="btn btn-ghost btn-sm" id="trn-prev-level">← Zurück</button>
+        <button class="btn btn-ghost btn-sm" id="trn-next-level">Weiter →</button>
+        <button class="btn btn-danger btn-sm" id="trn-reset-timer">↺ Reset</button>
+      </div>
+      <div class="stat-label">Alle Level</div>
+      <div id="trn-levels-list" style="max-height:320px;overflow-y:auto;padding-right:4px;"></div>
+    </div>
+
+    <!-- Prize Distribution -->
+    <div class="panel">
+      <div class="panel-title">Preisgeldverteilung</div>
+      <div class="panel-sub">Final Table ab 8 verbleibenden Spielern · berechnet aus dem Gesamtpott</div>
+      <table class="trn-prize-tbl" id="trn-prize-tbl">
+        <thead><tr><th>Rang</th><th>Anteil</th><th>Betrag</th></tr></thead>
+        <tbody id="trn-prize-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Chip Sets -->
+    <div class="panel">
+      <div class="panel-title">Chip-Sets</div>
+      <div class="panel-sub">Startstack-Zusammensetzung</div>
+      <div class="trn-chip-sets" id="trn-chip-sets"></div>
+    </div>
+
+    <!-- Save / Finish tournament -->
+    <div class="panel">
+      <div class="panel-title">Turnier abschliessen & speichern</div>
+      <div class="panel-sub">Trage die Endrangliste ein (mind. Platz 1). Preisgeld wird automatisch berechnet.</div>
+      <div id="trn-save-list"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn btn-gold" id="trn-save-btn-final">🏆 Turnier speichern</button>
+        <button class="btn btn-ghost btn-sm" id="trn-save-add-row">+ Platz hinzufügen</button>
+        <button class="btn btn-danger btn-sm" id="trn-clear-btn">Zurücksetzen</button>
+      </div>
+    </div>
+
   </section>
 </div>
 
@@ -449,7 +755,7 @@ if (!isConfigured) document.getElementById('config-warn').classList.remove('hidd
 
 const sb = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-const state = { user: null, groups: [], currentGroup: null, players: [], activeGame: null, history: [] };
+const state = { user: null, groups: [], currentGroup: null, players: [], activeGame: null, history: [], tournaments: [] };
 let activeTimerInterval = null;
 let leaderboardChart = null;
 let currentSeason = 2;
@@ -601,14 +907,16 @@ $('back-to-groups').addEventListener('click', () => {
 
 async function loadGroupData() {
   const gid = state.currentGroup.id;
-  const [{ data: ps }, { data: gs }] = await Promise.all([
+  const [{ data: ps }, { data: gs }, { data: ts }] = await Promise.all([
     sb.from('players').select('*').eq('group_id', gid).order('created_at'),
     sb.from('games').select('*, game_participants(*, players(*))').eq('group_id', gid).order('date', { ascending: false }),
+    sb.from('tournaments').select('*, tournament_results(*)').eq('group_id', gid).order('date', { ascending: false }),
   ]);
   state.players = ps || [];
   const games = gs || [];
   state.activeGame = games.find(g => g.phase !== 'done') || null;
   state.history = games.filter(g => g.phase === 'done');
+  state.tournaments = ts || [];
   renderPlayers();
   renderGame();
   renderHistory();
@@ -616,7 +924,8 @@ async function loadGroupData() {
 
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  ['players','game','history'].forEach(n => $('tab-' + n).classList.toggle('hidden', n !== name));
+  ['players','game','history','tournament'].forEach(n => $('tab-' + n).classList.toggle('hidden', n !== name));
+  if (name === 'tournament') trnInitUI();
 }
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
@@ -1010,11 +1319,101 @@ document.querySelectorAll('.season-tab').forEach(btn => {
   });
 });
 
+let historyActiveSubtab = 'cash';
+function applyHistorySubtab() {
+  document.querySelectorAll('.history-subtab').forEach(b => b.classList.toggle('active', b.dataset.subtab === historyActiveSubtab));
+  $('history-cash').classList.toggle('hidden', historyActiveSubtab !== 'cash');
+  $('history-tourneys').classList.toggle('hidden', historyActiveSubtab !== 'tourneys');
+  if (historyActiveSubtab === 'tourneys') renderTournamentHistory();
+}
+document.querySelectorAll('.history-subtab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    historyActiveSubtab = btn.dataset.subtab;
+    applyHistorySubtab();
+  });
+});
+
+function getTournamentWinnersMap() {
+  // Map player_id -> number of tournament wins (rank 1) in current season
+  const wins = {};
+  (state.tournaments || []).filter(t => (t.season || 2) === currentSeason).forEach(t => {
+    (t.tournament_results || []).filter(r => r.rank === 1).forEach(r => {
+      if (r.player_id) wins[r.player_id] = (wins[r.player_id] || 0) + 1;
+    });
+  });
+  return wins;
+}
+
+function renderTournamentHistory() {
+  const list = $('trn-history-list');
+  const champsList = $('trn-champs-list');
+  if (!list || !champsList) return;
+  const all = (state.tournaments || []).filter(t => (t.season || 2) === currentSeason);
+  $('trn-history-sub').textContent = all.length === 0
+    ? 'Noch keine Turniere gespeichert'
+    : `${all.length} Turnier${all.length === 1 ? '' : 'e'} in Season ${currentSeason}`;
+
+  // Champions summary: wins per player name
+  const winsByName = {};
+  all.forEach(t => (t.tournament_results || []).filter(r => r.rank === 1).forEach(r => {
+    const key = r.player_name || '—';
+    if (!winsByName[key]) winsByName[key] = { name: key, wins: 0, totalPrize: 0 };
+    winsByName[key].wins++;
+    winsByName[key].totalPrize += (r.prize_amount || 0);
+  }));
+  const champs = Object.values(winsByName).sort((a, b) => b.wins - a.wins || b.totalPrize - a.totalPrize);
+  if (champs.length === 0) {
+    champsList.innerHTML = '<div class="empty-state">Noch keine Champions</div>';
+  } else {
+    champsList.innerHTML = champs.map((c, i) => `
+      <div class="ranking-row">
+        <div class="rank ${i === 0 ? 'rank-1' : ''}">${i === 0 ? '🏆' : (i + 1)}</div>
+        <div class="avatar">${esc(initials(c.name))}</div>
+        <div>
+          <div class="player-name">${esc(c.name)}<span class="trn-champ-badge">🏆 ${c.wins}×</span></div>
+          <div class="games-played">${c.wins} Sieg${c.wins === 1 ? '' : 'e'}</div>
+        </div>
+        <div class="all-time-amount stat-win">+${fmt(c.totalPrize)}</div>
+        <div style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;">CHF</div>
+      </div>
+    `).join('');
+  }
+
+  if (all.length === 0) {
+    list.innerHTML = '<div class="empty-state">Noch keine Turniere gespielt</div>';
+    return;
+  }
+  list.innerHTML = all.map(t => {
+    const results = [...(t.tournament_results || [])].sort((a, b) => a.rank - b.rank);
+    const winner = results.find(r => r.rank === 1);
+    const rows = results.map(r => {
+      const isWin = r.rank === 1;
+      return `<div class="trn-result-row ${isWin ? 'winner' : ''}">
+        <div class="rk-badge">${isWin ? '🏆' : r.rank + '.'}</div>
+        <div class="pname">${esc(r.player_name || '—')}</div>
+        <div class="prize-cell ${(!r.prize_amount) ? 'zero' : ''}">${r.prize_amount ? fmt(r.prize_amount) + ' CHF' : '—'}</div>
+      </div>`;
+    }).join('');
+    return `<div class="trn-history-card">
+      <div class="trn-history-head">
+        <div>
+          <div class="trn-history-title">${esc(t.name)}${winner ? ` · Sieger: <span style="color:#fde047;">🏆 ${esc(winner.player_name)}</span>` : ''}</div>
+          <div class="trn-history-meta">${esc(fmtDate(t.date))}${t.location ? ' · ' + esc(t.location) : ''} · ${t.player_count} Spieler · ${t.rebuys_used} Rebuys</div>
+        </div>
+        <div class="trn-history-pot">Pott: ${fmt(t.total_pot)} CHF</div>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+}
+
 function renderHistory() {
   computeSeason1Champion();
   if ($('ranking-title')) $('ranking-title').textContent = `Season ${currentSeason} Rangliste`;
   rebuildFilterOptions();
   const filtered = getFiltered();
+  // Also refresh tournament sub-view (updates champs badge etc.)
+  if ($('trn-history-list')) renderTournamentHistory();
 
   const totals = {};
   filtered.forEach(g => {
@@ -1050,15 +1449,17 @@ function renderHistory() {
 
   const rankList = $('ranking-list');
   rankList.innerHTML = '';
+  const tournamentWins = getTournamentWinnersMap();
   ranking.forEach((p, i) => {
     const isChamp = season1ChampId && p.id === season1ChampId;
+    const trnWins = tournamentWins[p.id] || 0;
     const row = document.createElement('div');
     row.className = 'ranking-row';
     row.innerHTML = `
       <div class="rank ${i === 0 ? 'rank-1' : ''}">${i + 1}</div>
       <div class="avatar">${esc(initials(p.name))}</div>
       <div>
-        <div class="player-name">${esc(p.name)}${isChamp ? '<span class="s1-badge">S1 Champ</span>' : ''}</div>
+        <div class="player-name">${esc(p.name)}${isChamp ? '<span class="s1-badge">S1 Champ</span>' : ''}${trnWins > 0 ? `<span class="trn-champ-badge">🏆 ${trnWins}×</span>` : ''}</div>
         <div class="games-played">${p.games} Spiel${p.games === 1 ? '' : 'e'}</div>
       </div>
       <div class="all-time-amount ${p.net > 0 ? 'stat-win' : p.net < 0 ? 'stat-loss' : ''}">${p.net > 0 ? '+' : ''}${fmt(p.net)}</div>
@@ -1095,6 +1496,483 @@ function renderHistory() {
     `;
     histList.appendChild(card);
   });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOURNAMENT MODE
+// ═══════════════════════════════════════════════════════════════
+
+const TRN_DEFAULT_CONFIG = {
+  name: 'XXL Poker Night',
+  location: 'Sycon Kirchberg',
+  date: '2026-08-29',
+  time: '20:00',
+  buyIn: 50,
+  rebuyAmount: 25,
+  maxRebuys: 1,
+  playerCount: 20,
+  rebuysUsed: 0,
+  remainingPlayers: 20,
+  blindLevels: [
+    { level: 1, smallBlind: 25, bigBlind: 50, durationMinutes: 30 },
+    { level: 2, smallBlind: 50, bigBlind: 100, durationMinutes: 30 },
+    { level: 3, smallBlind: 75, bigBlind: 150, durationMinutes: 30 },
+    { isBreak: true, durationMinutes: 10 },
+    { level: 4, smallBlind: 100, bigBlind: 200, durationMinutes: 30 },
+    { level: 5, smallBlind: 150, bigBlind: 300, durationMinutes: 30, isRebuyEnd: true },
+    { level: 6, smallBlind: 200, bigBlind: 400, durationMinutes: 30 },
+    { isBreak: true, durationMinutes: 10 },
+    { level: 7, smallBlind: 300, bigBlind: 600, durationMinutes: 30 },
+    { level: 8, smallBlind: 400, bigBlind: 800, durationMinutes: 30 },
+    { level: 9, smallBlind: 500, bigBlind: 1000, durationMinutes: 30 },
+    { isBreak: true, durationMinutes: 10 },
+    { level: 10, smallBlind: 750, bigBlind: 1500, durationMinutes: 30 },
+    { level: 11, smallBlind: 1000, bigBlind: 2000, durationMinutes: 30 },
+    { level: 12, smallBlind: 1500, bigBlind: 3000, durationMinutes: 30 },
+    { level: 13, smallBlind: 2000, bigBlind: 4000, durationMinutes: 30 },
+  ],
+  prizeDistribution: [
+    { rank: 1, percentage: 40 },
+    { rank: 2, percentage: 25 },
+    { rank: 3, percentage: 15 },
+    { rank: 4, percentage: 10 },
+    { rank: 5, percentage: 6 },
+    { rank: 6, percentage: 4 },
+    { rank: 7, percentage: 0 },
+    { rank: 8, percentage: 0 },
+  ],
+  chipSets: [
+    { type: 'buyIn', label: "Buy-In Stack (10'000)", chips: [
+      { color: 'Weiss', value: 25, count: 8 },
+      { color: 'Rot', value: 100, count: 8 },
+      { color: 'Grün', value: 500, count: 6 },
+      { color: 'Blau', value: 1000, count: 6 },
+    ]},
+    { type: 'rebuy', label: "Rebuy Stack (5'000)", chips: [
+      { color: 'Weiss', value: 25, count: 4 },
+      { color: 'Rot', value: 100, count: 4 },
+      { color: 'Grün', value: 500, count: 3 },
+      { color: 'Blau', value: 1000, count: 3 },
+    ]},
+  ],
+};
+
+const TRN_PHASES = [
+  { num: 1, label: 'Start', desc: '2 grosse Tische' },
+  { num: 2, label: 'Turnierphase', desc: 'Parallel-Spiel' },
+  { num: 3, label: 'Tischabbau', desc: 'Ausgleich' },
+  { num: 4, label: 'Final Table', desc: 'Ab 8 Spielern' },
+  { num: 5, label: 'Preisgeld', desc: 'Auszahlung' },
+];
+
+const TRN_STORAGE_KEY = 'pokerRoyal.tournamentConfig';
+const TRN_STATE_KEY = 'pokerRoyal.tournamentState';
+
+let trnConfig = null;
+let trnState = null; // { levelIndex, elapsedSec, running, lastTickMs }
+let trnInterval = null;
+let trnUIReady = false;
+
+function trnLoadConfig() {
+  try {
+    const raw = localStorage.getItem(TRN_STORAGE_KEY);
+    if (raw) {
+      const merged = { ...TRN_DEFAULT_CONFIG, ...JSON.parse(raw) };
+      // Always use latest static data from defaults (chip colors, levels, prize %)
+      merged.chipSets = TRN_DEFAULT_CONFIG.chipSets;
+      merged.blindLevels = TRN_DEFAULT_CONFIG.blindLevels;
+      merged.prizeDistribution = TRN_DEFAULT_CONFIG.prizeDistribution;
+      return merged;
+    }
+  } catch {}
+  return { ...TRN_DEFAULT_CONFIG };
+}
+function trnSaveConfig() {
+  try { localStorage.setItem(TRN_STORAGE_KEY, JSON.stringify(trnConfig)); } catch {}
+}
+function trnLoadState() {
+  try {
+    const raw = localStorage.getItem(TRN_STATE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { levelIndex: 0, elapsedSec: 0, running: false };
+}
+function trnSaveState() {
+  try { localStorage.setItem(TRN_STATE_KEY, JSON.stringify(trnState)); } catch {}
+}
+
+function trnCurrentLevel() { return trnConfig.blindLevels[trnState.levelIndex] || null; }
+function trnLevelDurationSec(l) { return (l && l.durationMinutes ? l.durationMinutes : 30) * 60; }
+function trnNextPlayingLevel(fromIdx) {
+  for (let i = fromIdx + 1; i < trnConfig.blindLevels.length; i++) {
+    if (!trnConfig.blindLevels[i].isBreak) return trnConfig.blindLevels[i];
+  }
+  return null;
+}
+function trnIsRebuyOver() {
+  // rebuys end after level 5 is complete (i.e. we've moved past the rebuy-end level)
+  const rebuyEndIdx = trnConfig.blindLevels.findIndex(l => l.isRebuyEnd);
+  if (rebuyEndIdx < 0) return false;
+  return trnState.levelIndex > rebuyEndIdx;
+}
+function trnComputePhase() {
+  const remaining = trnConfig.remainingPlayers || trnConfig.playerCount;
+  if (remaining <= 1) return 5;
+  if (remaining <= 8) return 4;
+  const lvl = trnCurrentLevel();
+  if (lvl && !lvl.isBreak && lvl.level === 1 && trnState.elapsedSec < 60) return 1;
+  if (remaining < trnConfig.playerCount) return 3;
+  return 2;
+}
+function trnPot() {
+  return (trnConfig.playerCount || 0) * (trnConfig.buyIn || 0)
+       + (trnConfig.rebuysUsed || 0) * (trnConfig.rebuyAmount || 0);
+}
+function trnFmtTime(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function trnInitUI() {
+  if (!trnConfig) trnConfig = trnLoadConfig();
+  if (!trnState) trnState = trnLoadState();
+  // Populate config form
+  $('trn-name').value = trnConfig.name || '';
+  $('trn-location').value = trnConfig.location || '';
+  $('trn-date').value = trnConfig.date || '';
+  $('trn-time').value = trnConfig.time || '';
+  $('trn-buyin').value = trnConfig.buyIn;
+  $('trn-rebuy-amt').value = trnConfig.rebuyAmount;
+  $('trn-maxrebuys').value = trnConfig.maxRebuys;
+  $('trn-playercount').value = trnConfig.playerCount;
+  $('trn-rebuysused').value = trnConfig.rebuysUsed;
+  if (trnConfig.remainingPlayers == null) trnConfig.remainingPlayers = trnConfig.playerCount;
+  if (!trnUIReady) {
+    trnBindHandlers();
+    trnUIReady = true;
+  }
+  trnRender();
+  trnEnsureInterval();
+}
+
+function trnBindHandlers() {
+  $('trn-save-btn').addEventListener('click', () => {
+    trnConfig.name = $('trn-name').value.trim() || 'Turnier';
+    trnConfig.location = $('trn-location').value.trim();
+    trnConfig.date = $('trn-date').value;
+    trnConfig.time = $('trn-time').value;
+    trnConfig.buyIn = parseFloat($('trn-buyin').value) || 0;
+    trnConfig.rebuyAmount = parseFloat($('trn-rebuy-amt').value) || 0;
+    trnConfig.maxRebuys = parseInt($('trn-maxrebuys').value) || 0;
+    const oldCount = trnConfig.playerCount;
+    trnConfig.playerCount = parseInt($('trn-playercount').value) || 0;
+    trnConfig.rebuysUsed = parseInt($('trn-rebuysused').value) || 0;
+    // If player count changed and remaining was equal to old total, sync it up
+    if (trnConfig.remainingPlayers == null || trnConfig.remainingPlayers === oldCount) {
+      trnConfig.remainingPlayers = trnConfig.playerCount;
+    } else if (trnConfig.remainingPlayers > trnConfig.playerCount) {
+      trnConfig.remainingPlayers = trnConfig.playerCount;
+    }
+    trnSaveConfig();
+    trnRender();
+    toast('Turnier gespeichert');
+  });
+
+  $('trn-timer-toggle').addEventListener('click', () => {
+    trnState.running = !trnState.running;
+    trnState.lastTickMs = Date.now();
+    trnSaveState();
+    trnRender();
+  });
+  $('trn-next-level').addEventListener('click', () => {
+    if (trnState.levelIndex < trnConfig.blindLevels.length - 1) {
+      trnState.levelIndex++;
+      trnState.elapsedSec = 0;
+      trnSaveState();
+      trnRender();
+    }
+  });
+  $('trn-prev-level').addEventListener('click', () => {
+    if (trnState.levelIndex > 0) {
+      trnState.levelIndex--;
+      trnState.elapsedSec = 0;
+      trnSaveState();
+      trnRender();
+    }
+  });
+  $('trn-reset-timer').addEventListener('click', () => {
+    if (!confirm('Timer zurücksetzen (Level 1, 00:00)?')) return;
+    trnState = { levelIndex: 0, elapsedSec: 0, running: false };
+    trnSaveState();
+    trnRender();
+  });
+  $('trn-players-inc').addEventListener('click', () => {
+    if (trnConfig.remainingPlayers < trnConfig.playerCount) {
+      trnConfig.remainingPlayers++;
+      trnSaveConfig();
+      trnRender();
+    }
+  });
+  $('trn-players-dec').addEventListener('click', () => {
+    if (trnConfig.remainingPlayers > 0) {
+      trnConfig.remainingPlayers--;
+      trnSaveConfig();
+      trnRender();
+    }
+  });
+
+  // Finish / save tournament panel
+  $('trn-save-add-row').addEventListener('click', () => {
+    trnRankInputs.push({ name: '', playerId: '' });
+    trnRenderSaveList();
+  });
+  $('trn-clear-btn').addEventListener('click', () => {
+    if (!confirm('Alle Ranglisten-Eingaben zurücksetzen?')) return;
+    trnRankInputs = trnDefaultRankInputs();
+    trnRenderSaveList();
+  });
+  $('trn-save-btn-final').addEventListener('click', trnSaveTournament);
+}
+
+function trnEnsureInterval() {
+  if (trnInterval) return;
+  trnInterval = setInterval(() => {
+    if (!trnState || !trnState.running) return;
+    const lvl = trnCurrentLevel();
+    if (!lvl) return;
+    trnState.elapsedSec++;
+    const dur = trnLevelDurationSec(lvl);
+    if (trnState.elapsedSec >= dur) {
+      if (trnState.levelIndex < trnConfig.blindLevels.length - 1) {
+        trnState.levelIndex++;
+        trnState.elapsedSec = 0;
+        try { toast('Nächstes Level: ' + (trnCurrentLevel().isBreak ? 'Pause' : 'Level ' + trnCurrentLevel().level)); } catch {}
+      } else {
+        trnState.running = false;
+        trnState.elapsedSec = dur;
+      }
+    }
+    trnSaveState();
+    if ($('tab-tournament') && !$('tab-tournament').classList.contains('hidden')) trnRender();
+  }, 1000);
+}
+
+function trnRender() {
+  if (!trnConfig || !trnState) return;
+  const lvl = trnCurrentLevel();
+  const dur = trnLevelDurationSec(lvl);
+  const remainingSec = Math.max(0, dur - trnState.elapsedSec);
+
+  // Live header
+  $('trn-live-name').textContent = trnConfig.name || 'Turnier';
+  const dt = (trnConfig.date ? new Date(trnConfig.date).toLocaleDateString('de-CH', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }) : '');
+  $('trn-live-sub').textContent = [dt, trnConfig.time ? trnConfig.time + ' Uhr' : '', trnConfig.location].filter(Boolean).join(' · ') || '—';
+  $('trn-live-pot').textContent = fmt(trnPot()) + ' CHF';
+
+  // Phase
+  const currentPhase = trnComputePhase();
+  const phasesEl = $('trn-phases');
+  phasesEl.innerHTML = TRN_PHASES.map(p => {
+    const cls = p.num === currentPhase ? 'active' : (p.num < currentPhase ? 'done' : '');
+    return `<div class="trn-phase ${cls}">
+      <div class="trn-phase-num">Phase ${p.num}</div>
+      <div class="trn-phase-label">${esc(p.label)}</div>
+      <div class="trn-phase-desc">${esc(p.desc)}</div>
+    </div>`;
+  }).join('');
+
+  // Final table alert
+  const remaining = trnConfig.remainingPlayers;
+  $('trn-ft-alert').classList.toggle('hidden', !(remaining <= 8 && remaining > 1));
+  $('trn-ft-count').textContent = remaining;
+
+  // Stats tiles
+  const rebuysAvailable = trnIsRebuyOver() ? 0 : Math.max(0, (trnConfig.maxRebuys * trnConfig.playerCount) - trnConfig.rebuysUsed);
+  $('trn-stats').innerHTML = `
+    <div class="stat-tile"><div class="num">${trnConfig.playerCount}</div><div class="lbl">Spieler Start</div></div>
+    <div class="stat-tile"><div class="num">${remaining}</div><div class="lbl">Verbleibend</div></div>
+    <div class="stat-tile"><div class="num">${trnConfig.rebuysUsed}</div><div class="lbl">Rebuys genutzt</div></div>
+    <div class="stat-tile"><div class="num">${trnIsRebuyOver() ? '—' : rebuysAvailable}</div><div class="lbl">${trnIsRebuyOver() ? 'Rebuys beendet' : 'Rebuys frei'}</div></div>
+    <div class="stat-tile"><div class="num">${fmt(trnPot())}</div><div class="lbl">Pott · CHF</div></div>
+  `;
+
+  $('trn-players-count').textContent = remaining;
+
+  // Timer big display
+  const cdEl = $('trn-countdown');
+  cdEl.textContent = trnFmtTime(remainingSec);
+  cdEl.className = 'trn-countdown'
+    + (lvl && lvl.isBreak ? ' is-break' : '')
+    + (remainingSec <= 60 && remainingSec > 30 && !(lvl && lvl.isBreak) ? ' warning' : '')
+    + (remainingSec <= 30 && !(lvl && lvl.isBreak) ? ' urgent' : '');
+
+  // Level badge + blinds boxes
+  const badge = $('trn-level-badge');
+  const blindsRow = $('trn-blinds-row');
+  if (lvl && lvl.isBreak) {
+    badge.innerHTML = `<span class="current-lvl">Pause</span>`;
+    blindsRow.innerHTML = `<div class="trn-blind-box"><div class="trn-blind-lbl">Pause</div><div class="trn-blind-val break-val">☕ ${lvl.durationMinutes} min</div></div>`;
+  } else if (lvl) {
+    badge.innerHTML = `<span class="current-lvl">Level ${lvl.level}</span> · Small / Big Blind`;
+    blindsRow.innerHTML = `
+      <div class="trn-blind-box"><div class="trn-blind-lbl">Small Blind</div><div class="trn-blind-val">${lvl.smallBlind}</div></div>
+      <div class="trn-blind-box"><div class="trn-blind-lbl">Big Blind</div><div class="trn-blind-val">${lvl.bigBlind}</div></div>`;
+  }
+  const nextPlaying = trnNextPlayingLevel(trnState.levelIndex);
+  if (nextPlaying && lvl && !lvl.isBreak) {
+    blindsRow.innerHTML += `<div class="trn-blind-box next-box"><div class="trn-blind-lbl">Nächste</div><div class="trn-blind-val">${nextPlaying.smallBlind}/${nextPlaying.bigBlind}</div></div>`;
+  } else if (nextPlaying && lvl && lvl.isBreak) {
+    blindsRow.innerHTML += `<div class="trn-blind-box next-box"><div class="trn-blind-lbl">Danach L${nextPlaying.level}</div><div class="trn-blind-val">${nextPlaying.smallBlind}/${nextPlaying.bigBlind}</div></div>`;
+  }
+
+  // Progress bar
+  $('trn-progress').style.width = (dur > 0 ? Math.min(100, (trnState.elapsedSec / dur) * 100) : 0) + '%';
+
+  // Timer button label
+  $('trn-timer-toggle').textContent = trnState.running ? '⏸ Pause' : '▶ Start';
+
+  // Levels list
+  const list = $('trn-levels-list');
+  list.innerHTML = trnConfig.blindLevels.map((l, i) => {
+    const cls = (i === trnState.levelIndex ? 'current-row ' : i < trnState.levelIndex ? 'past-row ' : '') + (l.isBreak ? 'break-row' : '');
+    if (l.isBreak) {
+      return `<div class="trn-level-row ${cls}"><div class="lv-num">☕</div><div class="lv-blinds">Pause</div><div class="lv-sb">–</div><div class="lv-dur">${l.durationMinutes} min</div></div>`;
+    }
+    const rebuyTag = l.isRebuyEnd ? ' <span style="color:var(--loss);font-size:10px;">(Rebuy-Ende)</span>' : '';
+    return `<div class="trn-level-row ${cls}">
+      <div class="lv-num">L${l.level}</div>
+      <div class="lv-blinds">SB ${l.smallBlind} / BB ${l.bigBlind}${rebuyTag}</div>
+      <div class="lv-sb">${l.smallBlind}/${l.bigBlind}</div>
+      <div class="lv-dur">${l.durationMinutes} min</div>
+    </div>`;
+  }).join('');
+
+  // Prize distribution
+  const pot = trnPot();
+  const prizeBody = $('trn-prize-body');
+  const rankClass = (r) => r === 1 ? 'trn-rank-gold' : r === 2 ? 'trn-rank-silver' : r === 3 ? 'trn-rank-bronze' : 'trn-rank-plain';
+  prizeBody.innerHTML = trnConfig.prizeDistribution.map(p => {
+    const amount = pot * p.percentage / 100;
+    return `<tr>
+      <td class="${rankClass(p.rank)}">${p.rank}.</td>
+      <td class="trn-pct">${p.percentage}%</td>
+      <td class="trn-chf ${amount === 0 ? 'zero' : ''}">${amount === 0 ? '—' : fmt(amount) + ' CHF'}</td>
+    </tr>`;
+  }).join('');
+
+  // Chip sets
+  $('trn-chip-sets').innerHTML = trnConfig.chipSets.map(set => `
+    <div>
+      <div class="trn-chip-set-lbl">${esc(set.label || set.type)}</div>
+      ${set.chips.map(c => {
+        const colorMap = { 'Weiss': 'trn-chip-weiss', 'Rot': 'trn-chip-rot', 'Grün': 'trn-chip-gruen', 'Blau': 'trn-chip-blau', 'Schwarz': 'trn-chip-schwarz' };
+        const colorClass = colorMap[c.color] || 'trn-chip-schwarz';
+        return `<div class="trn-chip-row">
+          <div class="trn-chip-circle ${colorClass}">${c.value}</div>
+          <div style="flex:1;">
+            <div class="trn-chip-val">Wert ${c.value}</div>
+            <div class="trn-chip-count">${esc(c.color)} · ${c.count} Stück</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  trnRenderSaveList();
+}
+
+// ─── Tournament ranking entry & save ─────────────────────────
+let trnRankInputs = null;
+function trnDefaultRankInputs() {
+  return Array.from({ length: 8 }, () => ({ name: '', playerId: '' }));
+}
+function trnRenderSaveList() {
+  if (!trnRankInputs) trnRankInputs = trnDefaultRankInputs();
+  const list = $('trn-save-list');
+  if (!list) return;
+  const pot = trnPot();
+  const prizeFor = (rank) => {
+    const p = trnConfig.prizeDistribution.find(x => x.rank === rank);
+    return p ? pot * p.percentage / 100 : 0;
+  };
+  const playerOptions = state.players.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+  list.innerHTML = trnRankInputs.map((r, i) => {
+    const rank = i + 1;
+    const prize = prizeFor(rank);
+    const rkCls = rank === 1 ? 'rk-1' : rank === 2 ? 'rk-2' : rank === 3 ? 'rk-3' : '';
+    return `<div class="trn-rank-input-row ${rkCls}">
+      <div class="rk">${rank === 1 ? '🏆' : rank + '.'}</div>
+      <input type="text" placeholder="Name" value="${esc(r.name)}" data-idx="${i}" data-fld="name">
+      <select data-idx="${i}" data-fld="pid">
+        <option value="">— aus Spielerliste —</option>
+        ${playerOptions}
+      </select>
+      <div class="prize ${prize === 0 ? 'zero' : ''}">${prize === 0 ? '—' : fmt(prize) + ' CHF'}</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      const fld = e.target.dataset.fld;
+      if (fld === 'name') trnRankInputs[idx].name = e.target.value;
+      else if (fld === 'pid') {
+        trnRankInputs[idx].playerId = e.target.value;
+        if (e.target.value) {
+          const p = state.players.find(pp => pp.id === e.target.value);
+          if (p) {
+            trnRankInputs[idx].name = p.name;
+            trnRenderSaveList();
+          }
+        }
+      }
+    });
+  });
+}
+
+async function trnSaveTournament() {
+  if (!state.currentGroup) { toast('Keine Gruppe aktiv'); return; }
+  const results = trnRankInputs
+    .map((r, i) => ({ rank: i + 1, name: (r.name || '').trim(), playerId: r.playerId || null }))
+    .filter(r => r.name.length > 0);
+  if (results.length === 0) { toast('Mindestens Platz 1 eintragen'); return; }
+  const pot = trnPot();
+  const btn = $('trn-save-btn-final');
+  btn.disabled = true;
+  const insertRow = {
+    group_id: state.currentGroup.id,
+    name: trnConfig.name || 'Turnier',
+    location: trnConfig.location || null,
+    date: trnConfig.date || new Date().toISOString().slice(0, 10),
+    buy_in: trnConfig.buyIn || 0,
+    rebuy_amount: trnConfig.rebuyAmount || 0,
+    max_rebuys: trnConfig.maxRebuys || 0,
+    player_count: trnConfig.playerCount || 0,
+    rebuys_used: trnConfig.rebuysUsed || 0,
+    total_pot: pot,
+    season: currentSeason || 2,
+  };
+  const { data: tourney, error } = await sb.from('tournaments').insert(insertRow).select().single();
+  if (error) { btn.disabled = false; toast('Fehler: ' + error.message); return; }
+  const resultRows = results.map(r => {
+    const prizeDef = trnConfig.prizeDistribution.find(x => x.rank === r.rank);
+    const prize = prizeDef ? pot * prizeDef.percentage / 100 : 0;
+    return { tournament_id: tourney.id, rank: r.rank, player_id: r.playerId, player_name: r.name, prize_amount: prize };
+  });
+  const { error: e2 } = await sb.from('tournament_results').insert(resultRows);
+  btn.disabled = false;
+  if (e2) { toast('Ergebnisse: ' + e2.message); return; }
+  toast('🏆 Turnier gespeichert');
+  // Reset timer + inputs
+  trnRankInputs = trnDefaultRankInputs();
+  trnState = { levelIndex: 0, elapsedSec: 0, running: false };
+  trnSaveState();
+  await loadGroupData();
+  trnRender();
+  switchTab('history');
+  historyActiveSubtab = 'tourneys';
+  applyHistorySubtab();
 }
 
 document.addEventListener('visibilitychange', async () => {
