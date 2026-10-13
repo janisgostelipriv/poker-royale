@@ -2,8 +2,23 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Poker Royal</title>
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Poker-Abende tracken: Spieler, Spiele, Turniere und Statistiken.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Poker Royal">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<!-- iOS: Home-Bildschirm-Icon -->
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Poker Royal">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -590,6 +605,97 @@
     border-radius: 999px; padding: 12px 18px; cursor: pointer;
     font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase; box-shadow: var(--shadow);
+  }
+
+  /* ===== Responsive: iPhone & schmale Screens =====
+     Ersetzt die alten Regeln, die Buttons/Spalten einfach ausgeblendet haben. */
+  @media (max-width: 760px) {
+    html, body { overflow-x: hidden; }
+    .app { padding: 20px 14px calc(96px + env(safe-area-inset-bottom, 0px)); }
+    .panel { padding: 18px 14px; }
+    header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header-right { width: 100%; flex-wrap: wrap; }
+
+    /* Tabs: horizontal scrollbar statt abgeschnitten */
+    .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: 1 0 auto; min-width: 84px; padding: 11px 10px; font-size: 11px; letter-spacing: 0.08em; }
+
+    .btn { letter-spacing: 0.08em; padding: 12px 14px; }
+    .btn-sm { padding: 9px 12px; }
+    .trn-btn-gold { letter-spacing: 0.08em; padding: 12px 14px; }
+
+    /* Gruppen: "Code kopieren" + "Öffnen" sind wieder sichtbar */
+    .group-row { grid-template-columns: 40px minmax(0, 1fr); row-gap: 10px; }
+    .group-row > *:nth-child(n+3) { display: block; }
+    .group-row > *:nth-child(3),
+    .group-row > *:nth-child(4) { grid-column: 1 / -1; width: 100%; }
+
+    /* Spielerliste: Telefon + Entfernen-Button sichtbar */
+    .player-row { grid-template-columns: 32px minmax(0, 1fr) auto; column-gap: 10px; row-gap: 4px; }
+    .player-row > .avatar        { grid-area: 1 / 1 / 2 / 2; }
+    .player-row > .player-name   { grid-area: 1 / 2 / 2 / 3; }
+    .player-row > button         { grid-area: 1 / 3 / 2 / 4; }
+    .player-row > .player-handle { grid-area: 2 / 2 / 3 / 4; }
+
+    /* Spiel: Cash-Out & Netto wieder sichtbar (zweizeilig) */
+    .game-header-row { display: none; }
+    .game-player-row {
+      grid-template-columns: 32px minmax(0, 1fr) 104px;
+      column-gap: 10px; row-gap: 8px; padding: 12px;
+    }
+    .game-player-row > .avatar              { grid-area: 1 / 1 / 2 / 2; }
+    .game-player-row > div:nth-child(2)     { grid-area: 1 / 2 / 2 / 3; }
+    .game-player-row > .net-cell            { grid-area: 1 / 3 / 2 / 4; display: block; }
+    .game-player-row > input[data-field="buy_in"]  { grid-area: 2 / 1 / 3 / 3; }
+    .game-player-row > .cashout-cell        { grid-area: 2 / 3 / 3 / 4; display: block; }
+
+    /* Abrechnung */
+    .settle-card { flex-wrap: wrap; padding: 14px; gap: 10px; }
+    .settle-amount { margin-left: auto; font-size: 16px; }
+
+    /* Rangliste */
+    .ranking-row { grid-template-columns: 24px 32px minmax(0, 1fr) auto; column-gap: 10px; padding: 12px; }
+    .ranking-row > div:nth-child(5) { display: none; }
+    .all-time-amount { min-width: 0; font-size: 15px; }
+    .all-time-amount::after { content: ' CHF'; font-size: 10px; color: var(--muted); }
+
+    .chart-wrap { height: 220px; padding: 10px; }
+    .stat-grid { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
+    .stat-tile { padding: 12px 8px; }
+    .stat-tile .num { font-size: 20px; }
+    .season-tabs, .history-subtabs { flex-wrap: wrap; }
+    .form-row, .form-row.single { grid-template-columns: 1fr; }
+    .form-row > .btn { width: 100%; }
+
+    /* Turnier */
+    .trn-huge-timer { font-size: clamp(44px, 19vw, 72px); }
+    .trn-live-players { grid-template-columns: 1fr; }
+    .trn-live-player { grid-template-columns: 36px minmax(0, 1fr); row-gap: 8px; }
+    .trn-live-player > .avatar { grid-area: 1 / 1 / 2 / 2; }
+    .trn-live-player > div:nth-child(2) { grid-area: 1 / 2 / 2 / 3; }
+    .trn-live-player > .actions { grid-area: 2 / 1 / 3 / 3; justify-content: flex-start; }
+    .trn-live-player .actions .btn { flex: 1 0 auto; }
+    .trn-rank-input-row { grid-template-columns: 30px minmax(0, 1fr) auto; row-gap: 8px; }
+    .trn-rank-input-row > input[data-fld="phone"] { display: block; grid-column: 1 / -1; }
+    .trn-final-rank-row { grid-template-columns: 36px 36px minmax(0, 1fr) auto; column-gap: 8px; padding: 10px; }
+    .trn-done-winner-name { font-size: 26px; }
+    .trn-done-crown { font-size: 60px; }
+    .trn-blind-box { padding: 10px 16px; min-width: 96px; }
+    .trn-blind-val { font-size: 22px; }
+    .trn-timer-btns .btn, .trn-timer-btns .trn-btn-gold { flex: 1 0 auto; }
+    .trn-result-row { grid-template-columns: 30px minmax(0, 1fr) auto; }
+  }
+
+  @media (max-width: 400px) {
+    .app { padding-left: 10px; padding-right: 10px; }
+    .tab { min-width: 74px; font-size: 10px; padding: 10px 6px; }
+    .btn { font-size: 11px; padding: 11px 12px; }
+    .player-row { grid-template-columns: 28px minmax(0, 1fr); }
+    .player-row > button { grid-area: 3 / 1 / 4 / 3; width: 100%; }
+    .player-row > .player-handle { grid-area: 2 / 2 / 3 / 3; }
+    .game-player-row { grid-template-columns: 28px minmax(0, 1fr) 92px; }
+    .trn-blind-box { min-width: 84px; padding: 10px 12px; }
   }
 </style>
 </head>
@@ -1255,8 +1361,8 @@ function renderActiveGame() {
     row.innerHTML = `
       <div class="avatar">${esc(initials(part.players.name))}</div>
       <div><span class="player-name">${esc(part.players.name)}</span></div>
-      <input type="number" step="0.01" min="0" placeholder="0.00" value="${buy || ''}" data-pid="${part.player_id}" data-field="buy_in">
-      <input class="cashout-cell" type="number" step="0.01" min="0" placeholder="0.00" value="${cash != null ? cash : ''}" data-pid="${part.player_id}" data-field="cash_out">
+      <input type="number" step="0.01" min="0" placeholder="Buy-In" value="${buy || ''}" data-pid="${part.player_id}" data-field="buy_in">
+      <input class="cashout-cell" type="number" step="0.01" min="0" placeholder="Cash-Out" value="${cash != null ? cash : ''}" data-pid="${part.player_id}" data-field="cash_out">
       <div class="net-cell stat-value ${net > 0 ? 'stat-win' : net < 0 ? 'stat-loss' : ''}">${net !== null ? (net > 0 ? '+' : '') + fmt(net) : '—'}</div>
     `;
     grid.appendChild(row);
