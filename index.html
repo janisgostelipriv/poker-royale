@@ -549,6 +549,48 @@
     .poker-seat .seat-num { font-size: 8px; }
     .trn-wizard-step { min-width: 66px; padding: 8px 6px; font-size: 10px; letter-spacing: 0.05em; }
   }
+
+  /* ===== PWA: Safe Areas (Notch / Home-Indicator) ===== */
+  html { background: var(--felt-deep); }
+  body {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .app { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  .auth-wrap { min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
+  .toast { bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ===== PWA: Install-Hinweis (iOS) & Install-Button (Android) ===== */
+  .pwa-ios-banner {
+    position: fixed; z-index: 300;
+    left: calc(12px + env(safe-area-inset-left, 0px));
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    display: flex; align-items: center; gap: 12px;
+    background: var(--felt-raised); border: 1px solid var(--gold-dim);
+    border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow);
+    font-size: 13px; color: var(--cream); max-width: 520px; margin: 0 auto;
+  }
+  .pwa-ios-banner .pwa-text { flex: 1; line-height: 1.4; }
+  .pwa-ios-banner strong { color: var(--gold); font-weight: 700; }
+  .pwa-ios-banner .pwa-close {
+    background: transparent; border: none; color: var(--muted);
+    font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px;
+  }
+  .pwa-ios-banner .pwa-close:hover { color: var(--cream); }
+  .pwa-share-icon { flex-shrink: 0; color: var(--gold); }
+
+  #pwa-install-btn {
+    position: fixed; z-index: 300;
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background: var(--gold); color: #0b1220; border: none;
+    border-radius: 999px; padding: 12px 18px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; box-shadow: var(--shadow);
+  }
 </style>
 </head>
 <body>
@@ -885,10 +927,17 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const isConfigured = SUPABASE_URL !== 'https://YOUR-PROJECT.supabase.co' && SUPABASE_ANON_KEY !== 'YOUR-ANON-KEY';
 if (!isConfigured) document.getElementById('config-warn').classList.remove('hidden');
 
-const sb = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const sb = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,       // Session ueberlebt App-Neustart (PWA / Tab-Wechsel)
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+}) : null;
 
 const state = { user: null, groups: [], currentGroup: null, players: [], activeGame: null, history: [], tournaments: [] };
 let activeTimerInterval = null;
+let activeTimerTick = null;
 let leaderboardChart = null;
 let currentSeason = 2;
 let season1ChampId = null;
@@ -900,6 +949,15 @@ const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('de-CH', { day: 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2400); }
 function showScreen(name) { ['login-screen','groups-screen','app-screen'].forEach(s => $(s).classList.toggle('hidden', s !== name)); if (name !== 'app-screen') document.body.classList.remove('tournament-mode'); }
+
+/* --- UI-State merken, damit App-/Tab-Wechsel nicht zum Hauptscreen zurueckwirft --- */
+const UI_KEY = 'pokerRoyal.ui.v1';
+let uiState = { groupId: null, tab: 'players', historySubtab: null };
+function uiLoad() {
+  try { const raw = localStorage.getItem(UI_KEY); if (raw) uiState = { ...uiState, ...JSON.parse(raw) }; } catch {}
+}
+function uiSave() { try { localStorage.setItem(UI_KEY, JSON.stringify(uiState)); } catch {} }
+uiLoad();
 function fmtDuration(sec) {
   if (!sec || sec <= 0) return null;
   const h = Math.floor(sec / 3600);
@@ -908,6 +966,7 @@ function fmtDuration(sec) {
 }
 function stopGameTimer() {
   if (activeTimerInterval) { clearInterval(activeTimerInterval); activeTimerInterval = null; }
+  activeTimerTick = null;
 }
 function startGameTimer(startIso) {
   stopGameTimer();
@@ -920,6 +979,7 @@ function startGameTimer(startIso) {
     const el = $('game-timer');
     if (el) el.textContent = (h > 0 ? String(h).padStart(2,'0') + ':' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
   }
+  activeTimerTick = tick;
   tick();
   activeTimerInterval = setInterval(tick, 1000);
 }
@@ -931,21 +991,39 @@ async function initAuth() {
     $('user-email').textContent = session.user.email;
     await loadGroups();
     showScreen('groups-screen');
+    await restoreUiState();
   } else {
     showScreen('login-screen');
   }
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
+    // Supabase feuert SIGNED_IN / TOKEN_REFRESHED auch beim Zurueckkehren in die App.
+    // Nur bei einem echten Benutzerwechsel neu aufbauen, sonst bleibt der Screen stehen.
+    if (session && session.user) {
+      const sameUser = state.user && state.user.id === session.user.id;
       state.user = session.user;
       $('user-email').textContent = session.user.email;
-      await loadGroups();
-      showScreen('groups-screen');
-      if (window.location.hash) history.replaceState(null, '', window.location.pathname);
+      if (sameUser) return; // nichts neu laden, aktuelle Ansicht beibehalten
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        await loadGroups();
+        showScreen('groups-screen');
+        await restoreUiState();
+        if (window.location.hash) history.replaceState(null, '', window.location.pathname);
+      }
     } else if (event === 'SIGNED_OUT') {
       state.user = null; state.currentGroup = null;
+      stopGameTimer();
+      uiState.groupId = null; uiSave();
       showScreen('login-screen');
     }
   });
+}
+
+// Zuletzt geoeffnete Gruppe + Tab wiederherstellen
+async function restoreUiState() {
+  if (!uiState.groupId) return;
+  const g = state.groups.find(x => x.id === uiState.groupId);
+  if (!g) { uiState.groupId = null; uiSave(); return; }
+  await openGroup(g.id, uiState.tab || 'players');
 }
 
 $('login-form').addEventListener('submit', async (e) => {
@@ -1022,18 +1100,20 @@ $('join-group-btn').addEventListener('click', async () => {
   toast('Gruppe beigetreten');
 });
 
-async function openGroup(groupId) {
+async function openGroup(groupId, tab) {
   const g = state.groups.find(x => x.id === groupId);
   if (!g) return;
   state.currentGroup = g;
+  uiState.groupId = g.id; uiSave();
   $('group-title').textContent = `${g.name} · Code: ${g.invite_code}`;
   await loadGroupData();
   showScreen('app-screen');
-  switchTab('players');
+  switchTab(tab || 'players');
 }
 
 $('back-to-groups').addEventListener('click', () => {
   state.currentGroup = null;
+  uiState.groupId = null; uiSave();
   showScreen('groups-screen');
 });
 
@@ -1055,6 +1135,7 @@ async function loadGroupData() {
 }
 
 function switchTab(name) {
+  uiState.tab = name; uiSave();
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   ['players','game','history','tournament'].forEach(n => $('tab-' + n).classList.toggle('hidden', n !== name));
   if (name === 'tournament') trnInitUI();
@@ -1681,7 +1762,7 @@ function trnDefault() {
       date: new Date().toISOString().slice(0, 10), time: '20:00',
       buyIn: 50, rebuyAmount: 25, maxRebuys: 1,
     },
-    timer: { levelIndex: 0, elapsedSec: 0, running: false },
+    timer: { levelIndex: 0, elapsedSec: 0, running: false, lastTickAt: null },
     eliminationCounter: 0, finalTableSeated: false, savedTournamentId: null,
   };
 }
@@ -1689,7 +1770,7 @@ function trnLoad() {
   try { const raw = localStorage.getItem(TRN_KEY); if (raw) return { ...trnDefault(), ...JSON.parse(raw) }; } catch {}
   return trnDefault();
 }
-function trnSaveLS() { try { localStorage.setItem(TRN_KEY, JSON.stringify(trnT)); } catch {} }
+function trnSaveLS() { if (!trnT) return; try { localStorage.setItem(TRN_KEY, JSON.stringify(trnT)); } catch {} }
 
 const trnPot = () => {
   const buys = trnT.players.length * (trnT.config.buyIn || 0);
@@ -1979,27 +2060,50 @@ function trnRenderDoneStep() {
   $('trn-final-save').textContent = trnT.savedTournamentId ? '✓ Bereits gespeichert' : '🏆 Turnier speichern';
 }
 
+/* Timer laeuft auf Basis der echten Uhrzeit (Date.now()).
+   So friert er nicht ein, wenn die App im Hintergrund ist oder iOS die Seite schlafen legt. */
+function trnTimerAdvance(deltaSec, quiet) {
+  let remaining = Math.max(0, Math.floor(deltaSec));
+  let guard = 0;
+  while (remaining > 0 && trnT.timer.running && guard++ < 2000) {
+    const lvl = trnCurrentLevel();
+    if (!lvl) break;
+    const dur = trnLevelDur(lvl);
+    const left = dur - trnT.timer.elapsedSec;
+    if (remaining < left) { trnT.timer.elapsedSec += remaining; remaining = 0; break; }
+    remaining -= left;
+    if (trnT.timer.levelIndex < TRN_BLIND_LEVELS.length - 1) {
+      trnT.timer.levelIndex++;
+      trnT.timer.elapsedSec = 0;
+      if (!quiet) {
+        try { toast('Nächstes Level: ' + (trnCurrentLevel().isBreak ? 'Pause' : 'Level ' + trnCurrentLevel().level)); } catch {}
+      }
+    } else {
+      trnT.timer.running = false;
+      trnT.timer.elapsedSec = dur;
+    }
+  }
+}
+
+function trnTimerSync() {
+  if (!trnT || !trnT.timer) return;
+  const t = trnT.timer;
+  if (!t.running) { if (t.lastTickAt) { t.lastTickAt = null; trnSaveLS(); } return; }
+  const now = Date.now();
+  if (!t.lastTickAt || t.lastTickAt > now) { t.lastTickAt = now; trnSaveLS(); return; }
+  const delta = Math.floor((now - t.lastTickAt) / 1000);
+  if (delta <= 0) return;
+  t.lastTickAt += delta * 1000;
+  if (trnT.step === 'live') trnTimerAdvance(delta, delta > 5); // nach langer Pause kein Toast-Spam
+  trnSaveLS();
+  const tabEl = $('tab-tournament');
+  if (trnUIReady && tabEl && !tabEl.classList.contains('hidden')) trnRender();
+}
+
 function trnEnsureInterval() {
   if (trnInterval) return;
-  trnInterval = setInterval(() => {
-    if (!trnT || trnT.step !== 'live' || !trnT.timer.running) return;
-    const lvl = trnCurrentLevel();
-    if (!lvl) return;
-    trnT.timer.elapsedSec++;
-    const dur = trnLevelDur(lvl);
-    if (trnT.timer.elapsedSec >= dur) {
-      if (trnT.timer.levelIndex < TRN_BLIND_LEVELS.length - 1) {
-        trnT.timer.levelIndex++;
-        trnT.timer.elapsedSec = 0;
-        try { toast('Nächstes Level: ' + (trnCurrentLevel().isBreak ? 'Pause' : 'Level ' + trnCurrentLevel().level)); } catch {}
-      } else {
-        trnT.timer.running = false;
-        trnT.timer.elapsedSec = dur;
-      }
-    }
-    trnSaveLS();
-    if (!$('tab-tournament').classList.contains('hidden')) trnRender();
-  }, 1000);
+  trnTimerSync();
+  trnInterval = setInterval(trnTimerSync, 1000);
 }
 
 function trnBindHandlers() {
@@ -2034,16 +2138,21 @@ function trnBindHandlers() {
     trnT.config.buyIn = parseFloat($('trn-cf-buyin').value) || 0;
     trnT.config.rebuyAmount = parseFloat($('trn-cf-rebuy').value) || 0;
     trnT.config.maxRebuys = parseInt($('trn-cf-maxrebuys').value) || 0;
-    trnT.timer = { levelIndex: 0, elapsedSec: 0, running: true };
+    trnT.timer = { levelIndex: 0, elapsedSec: 0, running: true, lastTickAt: Date.now() };
     trnT.savedTournamentId = null;
     trnGoto('live');
   });
-  $('trn-lv-toggle').addEventListener('click', () => { trnT.timer.running = !trnT.timer.running; trnSaveLS(); trnRender(); });
+  $('trn-lv-toggle').addEventListener('click', () => {
+    trnTimerSync();
+    trnT.timer.running = !trnT.timer.running;
+    trnT.timer.lastTickAt = trnT.timer.running ? Date.now() : null;
+    trnSaveLS(); trnRender();
+  });
   $('trn-lv-prev').addEventListener('click', () => {
-    if (trnT.timer.levelIndex > 0) { trnT.timer.levelIndex--; trnT.timer.elapsedSec = 0; trnSaveLS(); trnRender(); }
+    if (trnT.timer.levelIndex > 0) { trnT.timer.levelIndex--; trnT.timer.elapsedSec = 0; trnT.timer.lastTickAt = trnT.timer.running ? Date.now() : null; trnSaveLS(); trnRender(); }
   });
   $('trn-lv-next').addEventListener('click', () => {
-    if (trnT.timer.levelIndex < TRN_BLIND_LEVELS.length - 1) { trnT.timer.levelIndex++; trnT.timer.elapsedSec = 0; trnSaveLS(); trnRender(); }
+    if (trnT.timer.levelIndex < TRN_BLIND_LEVELS.length - 1) { trnT.timer.levelIndex++; trnT.timer.elapsedSec = 0; trnT.timer.lastTickAt = trnT.timer.running ? Date.now() : null; trnSaveLS(); trnRender(); }
   });
   $('trn-goto-ft-draw').addEventListener('click', () => {
     trnT.players.filter(p => p.alive).forEach(p => { p.tableId = null; p.seat = null; });
@@ -2110,19 +2219,188 @@ async function trnSaveTournament() {
   applyHistorySubtab();
 }
 
-document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState !== 'visible' || !sb || !state.user) return;
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    state.user = null;
-    state.currentGroup = null;
-    stopGameTimer();
-    showScreen('login-screen');
-    toast('Session abgelaufen — bitte neu anmelden');
+/* --- App-Wiederaufnahme (Tab-Wechsel, Home-Button, PWA-Resume) ---
+   Wichtig: NICHT zurueck zum Login/Hauptscreen werfen. Nur Timer nachziehen,
+   Session still erneuern und Daten im Hintergrund aktualisieren. */
+let resumeBusy = false;
+
+async function onAppResume() {
+  // 1) Timer sofort auf die echte Uhrzeit nachziehen
+  try { trnTimerSync(); } catch {}
+  try { if (activeTimerTick) activeTimerTick(); } catch {}
+
+  if (resumeBusy || !sb || !state.user) return;
+  resumeBusy = true;
+  try {
+    // 2) Session pruefen - bei Netzproblemen NICHT ausloggen
+    let session = null;
+    try {
+      const res = await sb.auth.getSession();
+      session = res && res.data ? res.data.session : null;
+    } catch (e) {
+      return; // offline o.ae. -> Ansicht unveraendert lassen
+    }
+
+    if (!session) {
+      // Zweiter Versuch: Token erneuern. Erst wenn auch das scheitert, ist die Session wirklich weg.
+      let refreshed = null;
+      try {
+        const res = await sb.auth.refreshSession();
+        refreshed = res && res.data ? res.data.session : null;
+      } catch (e) { refreshed = null; }
+      if (!refreshed) {
+        if (!navigator.onLine) return; // offline: nichts tun, Daten bleiben erhalten
+        state.user = null;
+        state.currentGroup = null;
+        stopGameTimer();
+        showScreen('login-screen');
+        toast('Session abgelaufen — bitte neu anmelden');
+      }
+      return;
+    }
+
+    // 3) Session ok -> Daten im Hintergrund auffrischen, Screen/Tab bleiben wie sie sind
+    if (state.currentGroup && canRefreshNow()) {
+      lastRefreshAt = Date.now();
+      try { await loadGroupData(); } catch (e) {}
+    }
+  } finally {
+    resumeBusy = false;
   }
+}
+
+let lastRefreshAt = 0;
+function canRefreshNow() {
+  // Nicht neu rendern, waehrend etwas eingegeben wird (sonst gehen Eingaben verloren)
+  const el = document.activeElement;
+  if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return false;
+  // Nicht mitten im laufenden Turnier-Tab stoeren
+  if (uiState.tab === 'tournament') return false;
+  return Date.now() - lastRefreshAt > 10000;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') onAppResume();
+  else { try { trnSaveLS(); } catch {} }
 });
+window.addEventListener('focus', onAppResume);
+window.addEventListener('pageshow', onAppResume);
+window.addEventListener('online', onAppResume);
+// Letzten Stand sichern, bevor iOS/Android die App aus dem Speicher wirft
+window.addEventListener('pagehide', () => { try { trnSaveLS(); uiSave(); } catch {} });
+
+// Turnier-Timer laeuft auch mit, wenn der Turnier-Tab gerade nicht offen ist
+try { if (!trnT) trnT = trnLoad(); trnEnsureInterval(); } catch {}
 
 if (isConfigured) initAuth();
+</script>
+
+<!-- ===== PWA: Install-UI (unabhaengig von der App-Logik) ===== -->
+<div id="pwa-ios-banner" class="pwa-ios-banner hidden" role="dialog" aria-live="polite">
+  <svg class="pwa-share-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 16V3"></path><path d="m8 7 4-4 4 4"></path>
+    <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
+  </svg>
+  <div class="pwa-text">App installieren: Tippe auf <strong>Teilen</strong> → <strong>Zum Home-Bildschirm</strong></div>
+  <button type="button" class="pwa-close" id="pwa-ios-close" aria-label="Hinweis schliessen">&times;</button>
+</div>
+
+<button type="button" id="pwa-install-btn" class="hidden">App installieren</button>
+
+<script>
+(function () {
+  'use strict';
+
+  var DISMISS_KEY = 'pr_pwa_ios_banner_dismissed';
+
+  function lsGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function lsSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+
+  function isStandalone() {
+    try {
+      return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+             window.navigator.standalone === true ||
+             document.referrer.indexOf('android-app://') === 0;
+    } catch (e) { return false; }
+  }
+
+  function isIos() {
+    var ua = navigator.userAgent || '';
+    var iosUA = /iPad|iPhone|iPod/.test(ua);
+    // iPadOS 13+ meldet sich als Mac mit Touch
+    var iPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    return iosUA || iPadOS;
+  }
+
+  /* --- 1) Service Worker registrieren + Update sauber uebernehmen --- */
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).then(function (reg) {
+        // Bei jedem Start auf Updates pruefen
+        reg.update().catch(function () {});
+        reg.addEventListener('updatefound', function () {
+          var sw = reg.installing;
+          if (!sw) return;
+          sw.addEventListener('statechange', function () {
+            if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+              // Neue Version bereit -> aktivieren
+              sw.postMessage('SKIP_WAITING');
+            }
+          });
+        });
+      }).catch(function () {});
+
+      var reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (reloading) return;
+        reloading = true;
+        // Einmaliger Reload, damit keine alte Version haengen bleibt
+        window.location.reload();
+      });
+    });
+  }
+
+  /* --- 2) iOS: Hinweis-Banner nur im Browser, nicht wenn installiert --- */
+  var banner = document.getElementById('pwa-ios-banner');
+  var closeBtn = document.getElementById('pwa-ios-close');
+  if (banner && closeBtn) {
+    if (isIos() && !isStandalone() && lsGet(DISMISS_KEY) !== '1') {
+      setTimeout(function () { banner.classList.remove('hidden'); }, 1500);
+    }
+    closeBtn.addEventListener('click', function () {
+      banner.classList.add('hidden');
+      lsSet(DISMISS_KEY, '1');
+    });
+  }
+
+  /* --- 3) Android/Chrome: eigener Install-Button --- */
+  var installBtn = document.getElementById('pwa-install-btn');
+  var deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn && !isStandalone()) installBtn.classList.remove('hidden');
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', function () {
+      if (!deferredPrompt) { installBtn.classList.add('hidden'); return; }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function () {
+        deferredPrompt = null;
+        installBtn.classList.add('hidden');
+      }).catch(function () {});
+    });
+  }
+
+  window.addEventListener('appinstalled', function () {
+    deferredPrompt = null;
+    if (installBtn) installBtn.classList.add('hidden');
+    if (banner) banner.classList.add('hidden');
+    lsSet(DISMISS_KEY, '1');
+  });
+})();
 </script>
 </body>
 </html>

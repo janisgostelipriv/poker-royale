@@ -1,0 +1,11 @@
+# IDE
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Lokale Spielereien / Scratch
+node_modules/
+

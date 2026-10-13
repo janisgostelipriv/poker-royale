@@ -38,3 +38,24 @@ Wähle eine Option:
 - Spieler verwalten, Spiele tracken, Verlauf anschauen
 
 Der Einladungs-Code einer Gruppe gibt Vollzugriff auf alle Daten dieser Gruppe.
+
+## 6. PWA (Installierbar auf iPhone & Android)
+
+Die App ist eine installierbare PWA. Relevante Dateien:
+`manifest.webmanifest`, `sw.js`, `icons/`, `.nojekyll`.
+
+**Lokal testen** (Service Worker brauchen http/https, nicht `file://`):
+```powershell
+node tools/serve.js --base /poker-royale/
+# -> http://localhost:8099/poker-royale/
+```
+Chrome DevTools → **Application → Manifest** (Icons/Install-Check) und
+**Application → Service Workers** (registriert/aktiv). Offline-Test: Network → "Offline" → Reload.
+
+**Icons neu erzeugen** (nach Austausch der Platzhalter nicht nötig):
+```powershell
+node tools/generate-icons.js
+```
+
+**Nach App-Änderungen**: in `sw.js` die `CACHE_VERSION` hochzählen, damit Clients das Update sicher ziehen.
+
