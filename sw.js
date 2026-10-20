@@ -2,7 +2,7 @@
  * App-Shell-Caching, damit die App offline startet.
  * Bei jeder Aenderung an der App: CACHE_VERSION hochzaehlen.
  */
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v5';
 const CACHE_NAME = `poker-royal-shell-${CACHE_VERSION}`;
 
 // Relative Pfade -> funktioniert auch unter /poker-royale/ auf GitHub Pages

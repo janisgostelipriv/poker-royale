@@ -7,7 +7,7 @@
 
 <!-- PWA -->
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#160a26">
 <meta name="description" content="Poker-Abende tracken: Spieler, Spiele, Turniere und Statistiken.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="Poker Royal">
@@ -26,15 +26,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --felt-deep: #0b1220;
-    --felt: #131c30;
-    --felt-raised: #1c2742;
-    --felt-border: #2a3656;
-    --gold: #22c55e;
-    --gold-dim: #16a34a;
-    --gold-soft: rgba(34, 197, 94, 0.15);
-    --cream: #e5e7eb;
-    --muted: #94a3b8;
+    /* Season 3 · Pink/Violett */
+    --felt-deep: #160a26;
+    --felt: #1f1035;
+    --felt-raised: #2c1849;
+    --felt-border: #432a6b;
+    --gold: #d946ef;
+    --gold-dim: #9333ea;
+    --gold-soft: rgba(217, 70, 239, 0.16);
+    --cream: #f1e8fb;
+    --muted: #a898c4;
     --win: #10b981;
     --loss: #ef4444;
     --shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
@@ -44,8 +45,8 @@
     font-family: 'Manrope', sans-serif;
     background: var(--felt-deep);
     background-image:
-      radial-gradient(ellipse at top, rgba(34, 197, 94, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(34, 197, 94, 0.04) 0%, transparent 60%);
+      radial-gradient(ellipse at top, rgba(217, 70, 239, 0.10) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(147, 51, 234, 0.08) 0%, transparent 60%);
     color: var(--cream);
     min-height: 100vh;
     line-height: 1.5;
@@ -109,7 +110,7 @@
     transition: all 0.2s ease; white-space: nowrap;
   }
   .btn-gold { background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dim) 100%); color: #fff; box-shadow: 0 2px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2); }
-  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(217,70,239,0.35); }
   .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .btn-ghost { background: transparent; color: var(--gold); border: 1px solid var(--gold-dim); }
   .btn-ghost:hover { background: var(--gold-soft); }
@@ -253,14 +254,104 @@
     font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
     padding: 2px 8px; background: rgba(0,0,0,0.25); border-radius: 4px;
   }
-  .s1-badge {
+  .s1-badge, .season-badge {
     display: inline-block; padding: 2px 8px; border-radius: 4px;
-    background: linear-gradient(135deg, #fde047, #f59e0b);
-    color: #000; font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    background: linear-gradient(135deg, #f472b6, #a855f7);
+    color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
     margin-left: 8px; vertical-align: middle; font-family: 'DM Sans', sans-serif;
     text-transform: uppercase;
   }
-  .season-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .season-badge.s1 { background: linear-gradient(135deg, #fde047, #f59e0b); color: #000; }
+  .season-badge.s2 { background: linear-gradient(135deg, #67e8f9, #0ea5e9); color: #04202e; }
+  .season-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .alltime-legend {    margin-top: 14px; padding: 12px 14px; border-radius: 8px;
+    background: rgba(0,0,0,0.25); border: 1px dashed var(--felt-border);
+    font-size: 11px; line-height: 1.7; color: var(--muted);
+  }
+  .alltime-legend strong { color: var(--cream); font-weight: 600; }
+  .trn-rebuy-tag {
+    display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 4px;
+    background: rgba(253,224,71,0.16); border: 1px solid rgba(253,224,71,0.35);
+    color: #fde047; font-size: 10px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace; vertical-align: middle;
+  }
+  .rebuy-king-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    background: linear-gradient(135deg, #fb923c, #ef4444);
+    color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    margin-left: 8px; vertical-align: middle; font-family: 'DM Sans', sans-serif;
+    text-transform: uppercase;
+  }
+  .hist-rebuy {
+    margin-left: 6px; padding: 1px 5px; border-radius: 3px;
+    background: rgba(251,146,60,0.18); color: #fdba74; font-size: 10px; font-weight: 700;
+  }
+
+  /* ── Statistik-Tab ──────────────────────────────── */
+  .konstanz-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    background: linear-gradient(135deg, #34d399, #0ea5e9);
+    color: #042f2e; font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    margin-left: 8px; vertical-align: middle; font-family: 'DM Sans', sans-serif;
+    text-transform: uppercase;
+  }
+  .konstanz-hint {
+    margin-top: 10px; font-size: 11px; color: var(--muted); font-style: italic;
+  }
+  .award-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;
+  }
+  .award-card {
+    display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 12px;
+    padding: 14px; background: rgba(0,0,0,0.25);
+    border: 1px solid var(--felt-border); border-radius: 10px;
+    transition: border-color 0.2s;
+  }
+  .award-card:hover { border-color: var(--gold-dim); }
+  .award-icon { font-size: 24px; text-align: center; line-height: 1; }
+  .award-body { min-width: 0; }
+  .award-title {
+    font-size: 10px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.12em; font-family: 'DM Sans', sans-serif; font-weight: 700;
+  }
+  .award-name {
+    font-weight: 600; font-size: 15px; color: var(--cream); margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .award-sub { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .award-val {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px;
+    color: var(--gold); white-space: nowrap;
+  }
+  .form-dots { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; }
+  .form-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .form-dot.w { background: var(--win); }
+  .form-dot.l { background: var(--loss); }
+  .form-dot.d { background: var(--muted); }
+  .stats-detail {
+    background: rgba(0,0,0,0.2); border: 1px solid var(--felt-border);
+    border-radius: 10px; margin-bottom: 6px; overflow: hidden;
+  }
+  .stats-detail > summary {
+    display: grid; grid-template-columns: 32px 1fr auto auto;
+    align-items: center; gap: 14px; padding: 14px 16px;
+    cursor: pointer; list-style: none; user-select: none;
+  }
+  .stats-detail > summary::-webkit-details-marker { display: none; }
+  .stats-detail > summary:hover { background: rgba(255,255,255,0.03); }
+  .stats-detail[open] > summary { border-bottom: 1px solid var(--felt-border); }
+  .stats-detail-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 2px; padding: 12px; background: rgba(0,0,0,0.15);
+  }
+  .stats-detail-grid > div {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 6px; background: rgba(0,0,0,0.2);
+  }
+  .stats-detail-grid span {
+    font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .stats-detail-grid b { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
   .season-tab {
     padding: 9px 18px; border-radius: 8px; border: 1px solid var(--felt-border);
     background: transparent; color: var(--muted); cursor: pointer;
@@ -269,6 +360,10 @@
   }
   .season-tab.active { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
   .season-tab:hover:not(.active) { color: var(--cream); }
+  .season-tab[data-season="all"].active {
+    background: linear-gradient(135deg, rgba(244,114,182,0.22), rgba(168,85,247,0.22));
+    border-color: #f472b6; color: #f9a8d4;
+  }
   @media (max-width: 640px) {
     header { flex-direction: column; align-items: flex-start; }
     .form-row { grid-template-columns: 1fr; }
@@ -601,7 +696,7 @@
     position: fixed; z-index: 300;
     right: calc(16px + env(safe-area-inset-right, 0px));
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    background: var(--gold); color: #0b1220; border: none;
+    background: var(--gold); color: #160a26; border: none;
     border-radius: 999px; padding: 12px 18px; cursor: pointer;
     font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase; box-shadow: var(--shadow);
@@ -667,6 +762,14 @@
     .season-tabs, .history-subtabs { flex-wrap: wrap; }
     .form-row, .form-row.single { grid-template-columns: 1fr; }
     .form-row > .btn { width: 100%; }
+
+    /* Statistiken */
+    .award-grid { grid-template-columns: 1fr; }
+    .award-card { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; padding: 12px; }
+    .award-icon { font-size: 20px; }
+    .stats-detail > summary { grid-template-columns: 30px minmax(0, 1fr) auto; column-gap: 10px; padding: 12px; }
+    .stats-detail > summary > .games-played { display: none; }
+    .stats-detail-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); padding: 8px; }
 
     /* Turnier */
     .trn-huge-timer { font-size: clamp(44px, 19vw, 72px); }
@@ -766,6 +869,7 @@
     <button class="tab active" data-tab="players">Spieler</button>
     <button class="tab" data-tab="game">Spiel</button>
     <button class="tab" data-tab="history">Verlauf</button>
+    <button class="tab" data-tab="stats">📊 Statistiken</button>
     <button class="tab" data-tab="tournament">🏆 Turnier</button>
   </div>
 
@@ -843,19 +947,35 @@
 
   <section id="tab-history" class="hidden">
     <div class="season-tabs">
-      <button class="season-tab active" data-season="2">Season 2</button>
+      <button class="season-tab active" data-season="3">Season 3</button>
+      <button class="season-tab" data-season="2">Season 2 · Archiv</button>
       <button class="season-tab" data-season="1">Season 1 · Archiv</button>
+      <button class="season-tab" data-season="all">★ All-Time</button>
     </div>
     <div class="history-subtabs">
       <button class="history-subtab active" data-subtab="cash">Cash Games</button>
       <button class="history-subtab" data-subtab="tourneys">🏆 Turniere</button>
     </div>
 
+    <div class="panel hidden" id="alltime-panel">
+      <div class="panel-title">★ All-Time Gesamtwertung</div>
+      <div class="panel-sub" id="alltime-sub">Cash Games &amp; Turniere über alle Seasons</div>
+      <div class="stat-grid" id="alltime-stats"></div>
+      <div id="alltime-list"></div>
+      <div class="alltime-legend">
+        <strong>Gesamt</strong> = Cash-Netto + Turnier-Netto<br>
+        <strong>Cash-Netto</strong> = Cash-Out − Buy-In über alle Cash Games<br>
+        <strong>Turnier-Netto</strong> = Preisgeld − Einsatz, wobei
+        Einsatz = Buy-In + eigene Rebuys. Bei älteren Turnieren wurden die Rebuys
+        nicht pro Spieler gespeichert — dort zählt nur der Buy-In.
+      </div>
+    </div>
+
     <div id="history-cash">
       <div class="panel">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
           <div>
-            <div class="panel-title" id="ranking-title">Season 2 Rangliste</div>
+            <div class="panel-title" id="ranking-title">Season 3 Rangliste</div>
             <div class="panel-sub" id="history-sub">Noch keine Spiele</div>
           </div>
           <select id="history-filter" style="max-width: 200px;">
@@ -887,6 +1007,61 @@
         <div class="panel-sub" id="trn-history-sub">Alle gespielten Turniere</div>
         <div id="trn-history-list"></div>
       </div>
+    </div>
+  </section>
+
+  <!-- ── STATISTIKEN ───────────────────────────────── -->
+  <section id="tab-stats" class="hidden">
+    <div class="season-tabs" id="stats-season-tabs">
+      <button class="season-tab active" data-sseason="3">Season 3</button>
+      <button class="season-tab" data-sseason="2">Season 2</button>
+      <button class="season-tab" data-sseason="1">Season 1</button>
+      <button class="season-tab" data-sseason="all">★ All-Time</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">📊 Übersicht</div>
+      <div class="panel-sub" id="stats-sub">Kennzahlen über alle Cash Games</div>
+      <div class="stat-grid" id="stats-overview"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🎖️ Rekorde &amp; Auszeichnungen</div>
+      <div class="panel-sub">Wer hält welchen Titel?</div>
+      <div id="stats-awards"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🎯 Konstanz-Rangliste</div>
+      <div class="panel-sub" id="konstanz-sub">Wer schwankt am wenigsten?</div>
+      <div id="konstanz-list"></div>
+      <div class="alltime-legend">
+        <strong>Konstanz</strong> misst, wie stark die Abend-Ergebnisse eines Spielers
+        um seinen eigenen Durchschnitt schwanken (Standardabweichung σ).<br>
+        Ein kleiner σ-Wert heisst: immer ähnliches Ergebnis — egal ob konstant
+        +20 oder konstant −20. Ein grosser Wert heisst Achterbahn.<br>
+        <strong>Score</strong> ist daraus abgeleitet (100 = maximal berechenbar).
+        Es braucht mindestens 3 Abende für eine Wertung.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">♻️ Rebuy-Statistik</div>
+      <div class="panel-sub" id="rebuy-sub">Ein Rebuy = 20 CHF</div>
+      <div class="stat-grid" id="rebuy-stats"></div>
+      <div id="rebuy-list"></div>
+      <div class="alltime-legend">
+        <strong>Berechnung:</strong> Der erste Einkauf von 20 CHF ist der Buy-In,
+        jede weitere 20er-Stufe ein Rebuy.<br>
+        Beispiel: 80 CHF Buy-In an einem Abend = 20 Buy-In + 3 × 20 Rebuy =
+        <strong>3 Rebuys</strong>.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">📋 Spieler-Details</div>
+      <div class="panel-sub">Alle Kennzahlen pro Spieler — tippe auf eine Zeile</div>
+      <div id="stats-players"></div>
     </div>
   </section>
 
@@ -1045,8 +1220,13 @@ const state = { user: null, groups: [], currentGroup: null, players: [], activeG
 let activeTimerInterval = null;
 let activeTimerTick = null;
 let leaderboardChart = null;
-let currentSeason = 2;
-let season1ChampId = null;
+/* ── Seasons ──────────────────────────────────────────────
+   ACTIVE_SEASON = Season, in die neue Spiele/Turniere geschrieben werden.
+   Vergangene Seasons bleiben als Archiv erhalten (Spalte "season").      */
+const ACTIVE_SEASON = 3;
+const ARCHIVED_SEASONS = [1, 2];
+let currentSeason = ACTIVE_SEASON;          // 1 | 2 | 3 | 'all'
+let seasonChampions = {};                   // { seasonNr: playerId }
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => (Math.round((n || 0) * 100) / 100).toFixed(2);
@@ -1238,14 +1418,16 @@ async function loadGroupData() {
   renderPlayers();
   renderGame();
   renderHistory();
+  renderStats();
 }
 
 function switchTab(name) {
   uiState.tab = name; uiSave();
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  ['players','game','history','tournament'].forEach(n => $('tab-' + n).classList.toggle('hidden', n !== name));
+  ['players','game','history','stats','tournament'].forEach(n => $('tab-' + n).classList.toggle('hidden', n !== name));
   if (name === 'tournament') trnInitUI();
   else document.body.classList.remove('tournament-mode');
+  if (name === 'stats') renderStats();
 }
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
@@ -1335,6 +1517,7 @@ $('start-game-btn').addEventListener('click', async () => {
   const { data: game, error } = await sb.from('games').insert({
     group_id: state.currentGroup.id, date,
     location: $('game-location').value.trim() || null, phase: 'playing',
+    season: ACTIVE_SEASON,
   }).select().single();
   if (error) { toast(error.message); return; }
   const inserts = Array.from(selectedParticipants).map(pid => ({ game_id: game.id, player_id: pid, buy_in: 0, cash_out: null }));
@@ -1537,7 +1720,7 @@ function renderLeaderboardChart(filtered) {
   });
 
   const labels = sortedGames.map(g => fmtDate(g.date));
-  const palette = ['#22c55e','#6366f1','#ef4444','#fde047','#3b82f6','#f97316','#ec4899','#8b5cf6','#06b6d4','#84cc16'];
+  const palette = ['#d946ef','#8b5cf6','#f472b6','#22d3ee','#fde047','#f97316','#38bdf8','#a3e635','#fb7185','#c084fc'];
   const datasets = allPlayerIds.map((pid, i) => ({
     label: playerNames[pid],
     data: datasetsMap[pid],
@@ -1581,29 +1764,51 @@ function renderLeaderboardChart(filtered) {
 
 let historyFilter = 'all';
 
-function computeSeason1Champion() {
-  const s1games = state.history.filter(g => (g.season || 1) === 1);
-  if (s1games.length === 0) { season1ChampId = null; return; }
-  const totals = {};
-  s1games.forEach(g => {
-    g.game_participants.forEach(r => {
-      const net = (r.cash_out || 0) - (r.buy_in || 0);
-      if (!totals[r.player_id]) totals[r.player_id] = 0;
-      totals[r.player_id] += net;
+/* Season eines Datensatzes (Altdaten ohne Spalte -> Season 1 bzw. 2) */
+const gameSeason = (g) => g.season || 1;
+const trnSeason = (t) => t.season || 2;
+const isAllTime = () => currentSeason === 'all';
+const seasonLabel = () => isAllTime() ? 'All-Time' : `Season ${currentSeason}`;
+
+/* Rebuys in Cash Games: ein Rebuy kostet 20 CHF. Der erste 20er ist der
+   Buy-In, jede weitere 20er-Stufe zaehlt als Rebuy -> 80 CHF = 3 Rebuys. */
+const REBUY_STEP = 20;
+const rebuysOf = (buyIn) => Math.max(0, Math.round((buyIn || 0) / REBUY_STEP) - 1);
+
+/* Champion einer abgeschlossenen Season = bestes Cash-Game-Netto */
+function computeSeasonChampions() {
+  seasonChampions = {};
+  ARCHIVED_SEASONS.forEach(s => {
+    const games = state.history.filter(g => gameSeason(g) === s);
+    if (games.length === 0) return;
+    const totals = {};
+    games.forEach(g => {
+      g.game_participants.forEach(r => {
+        const net = (r.cash_out || 0) - (r.buy_in || 0);
+        totals[r.player_id] = (totals[r.player_id] || 0) + net;
+      });
     });
+    let champId = null, champNet = -Infinity;
+    Object.entries(totals).forEach(([pid, net]) => {
+      if (net > champNet) { champNet = net; champId = pid; }
+    });
+    if (champId) seasonChampions[s] = champId;
   });
-  let champId = null, champNet = -Infinity;
-  Object.entries(totals).forEach(([pid, net]) => {
-    if (net > champNet) { champNet = net; champId = pid; }
-  });
-  season1ChampId = champId;
+}
+
+/* HTML der verdienten Season-Champion-Abzeichen eines Spielers */
+function championBadges(playerId) {
+  return ARCHIVED_SEASONS
+    .filter(s => seasonChampions[s] && seasonChampions[s] === playerId)
+    .map(s => `<span class="season-badge s${s}">S${s} Champ</span>`)
+    .join('');
 }
 
 function rebuildFilterOptions() {
   const sel = $('history-filter');
   const current = sel.value || 'all';
   const months = new Set();
-  state.history.filter(g => (g.season || 1) === currentSeason).forEach(g => months.add(g.date.slice(0, 7)));
+  state.history.filter(g => isAllTime() || gameSeason(g) === currentSeason).forEach(g => months.add(g.date.slice(0, 7)));
   const sorted = Array.from(months).sort().reverse();
   const monthNames = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   sel.innerHTML = '<option value="all">Alle Zeiten</option>'
@@ -1617,7 +1822,7 @@ function rebuildFilterOptions() {
 }
 
 function getFiltered() {
-  const bySeason = state.history.filter(g => (g.season || 1) === currentSeason);
+  const bySeason = state.history.filter(g => isAllTime() || gameSeason(g) === currentSeason);
   if (historyFilter === 'all') return bySeason;
   const now = new Date();
   if (historyFilter === 'thismonth') return bySeason.filter(g => g.date.startsWith(now.toISOString().slice(0, 7)));
@@ -1630,10 +1835,11 @@ $('history-filter').addEventListener('change', (e) => {
   renderHistory();
 });
 
-document.querySelectorAll('.season-tab').forEach(btn => {
+document.querySelectorAll('#tab-history .season-tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    currentSeason = parseInt(btn.dataset.season);
-    document.querySelectorAll('.season-tab').forEach(b => b.classList.toggle('active', b === btn));
+    const v = btn.dataset.season;
+    currentSeason = v === 'all' ? 'all' : parseInt(v);
+    document.querySelectorAll('#tab-history .season-tab').forEach(b => b.classList.toggle('active', b === btn));
     historyFilter = 'all';
     renderHistory();
   });
@@ -1653,10 +1859,14 @@ document.querySelectorAll('.history-subtab').forEach(btn => {
   });
 });
 
+function getSeasonTournaments() {
+  return (state.tournaments || []).filter(t => isAllTime() || trnSeason(t) === currentSeason);
+}
+
 function getTournamentWinnersMap() {
-  // Map player_id -> number of tournament wins (rank 1) in current season
+  // Map player_id -> Anzahl Turniersiege (Rang 1) in der gewaehlten Season
   const wins = {};
-  (state.tournaments || []).filter(t => (t.season || 2) === currentSeason).forEach(t => {
+  getSeasonTournaments().forEach(t => {
     (t.tournament_results || []).filter(r => r.rank === 1).forEach(r => {
       if (r.player_id) wins[r.player_id] = (wins[r.player_id] || 0) + 1;
     });
@@ -1668,10 +1878,15 @@ function renderTournamentHistory() {
   const list = $('trn-history-list');
   const champsList = $('trn-champs-list');
   if (!list || !champsList) return;
-  const all = (state.tournaments || []).filter(t => (t.season || 2) === currentSeason);
+  const all = getSeasonTournaments();
+  if ($('trn-champs-sub')) {
+    $('trn-champs-sub').textContent = isAllTime()
+      ? 'Bisherige Turniersieger aller Seasons'
+      : `Bisherige Turniersieger · ${seasonLabel()}`;
+  }
   $('trn-history-sub').textContent = all.length === 0
     ? 'Noch keine Turniere gespeichert'
-    : `${all.length} Turnier${all.length === 1 ? '' : 'e'} in Season ${currentSeason}`;
+    : `${all.length} Turnier${all.length === 1 ? '' : 'e'} · ${seasonLabel()}`;
 
   // Champions summary: wins per player name
   const winsByName = {};
@@ -1704,13 +1919,15 @@ function renderTournamentHistory() {
     return;
   }
   list.innerHTML = all.map(t => {
-    const results = [...(t.tournament_results || [])].sort((a, b) => ((b.cash_out||0)-(b.buy_in||0)) - ((a.cash_out||0)-(a.buy_in||0)));
+    const results = [...(t.tournament_results || [])].sort((a, b) => (a.rank || 99) - (b.rank || 99));
     const winner = results.find(r => r.rank === 1);
     const rows = results.map(r => {
       const isWin = r.rank === 1;
-      return `<div class="trn-result-row ${isWin ? 'winner' : ''}">
+      const stake = (t.buy_in || 0) + (r.rebuys || 0) * (t.rebuy_amount || 0);
+      const net = (r.prize_amount || 0) - stake;
+      return `<div class="trn-result-row ${isWin ? 'winner' : ''}" title="Einsatz ${fmt(stake)} CHF (Buy-In ${fmt(t.buy_in || 0)}${r.rebuys ? ` + ${r.rebuys} Rebuy${r.rebuys === 1 ? '' : 's'} à ${fmt(t.rebuy_amount || 0)}` : ''}) · Netto ${net > 0 ? '+' : ''}${fmt(net)} CHF">
         <div class="rk-badge">${isWin ? '🏆' : r.rank + '.'}</div>
-        <div class="pname">${esc(r.player_name || '—')}</div>
+        <div class="pname">${esc(r.player_name || '—')}${r.rebuys ? `<span class="trn-rebuy-tag">+${r.rebuys} Rebuy${r.rebuys === 1 ? '' : 's'}</span>` : ''}</div>
         <div class="prize-cell ${(!r.prize_amount) ? 'zero' : ''}">${r.prize_amount ? fmt(r.prize_amount) + ' CHF' : '—'}</div>
       </div>`;
     }).join('');
@@ -1718,7 +1935,7 @@ function renderTournamentHistory() {
       <div class="trn-history-head">
         <div>
           <div class="trn-history-title">${esc(t.name)}${winner ? ` · Sieger: <span style="color:#fde047;">🏆 ${esc(winner.player_name)}</span>` : ''}</div>
-          <div class="trn-history-meta">${esc(fmtDate(t.date))}${t.location ? ' · ' + esc(t.location) : ''} · ${t.player_count} Spieler · ${t.rebuys_used} Rebuys</div>
+          <div class="trn-history-meta">${esc(fmtDate(t.date))}${t.location ? ' · ' + esc(t.location) : ''} · ${t.player_count} Spieler · ${t.rebuys_used} Rebuys${isAllTime() ? ` · Season ${trnSeason(t)}` : ''}</div>
         </div>
         <div class="trn-history-pot">Pott: ${fmt(t.total_pot)} CHF</div>
       </div>
@@ -1727,29 +1944,435 @@ function renderTournamentHistory() {
   }).join('');
 }
 
+// ── All-Time Gesamtwertung (Cash Games + Turniere, alle Seasons) ──────────
+function renderAllTimeTable() {
+  const panel = $('alltime-panel');
+  if (!panel) return;
+  panel.classList.toggle('hidden', !isAllTime());
+  if (!isAllTime()) return;
+
+  const rows = {};          // player_id -> Eintrag
+  const byName = {};        // Fallback-Zuordnung ueber den Namen (Turnier-Gaeste)
+  const get = (id, name) => {
+    const key = id || ('name:' + name);
+    if (!rows[key]) rows[key] = {
+      key, name, cashNet: 0, games: 0, trnNet: 0, tourneys: 0, wins: 0, prize: 0,
+      stake: 0, cashRebuys: 0, trnDetail: [], playerId: id || null,
+    };
+    if (name) { rows[key].name = name; byName[name] = rows[key]; }
+    return rows[key];
+  };
+
+  // Cash Games aller Seasons
+  state.history.forEach(g => {
+    g.game_participants.forEach(r => {
+      const e = get(r.player_id, r.players?.name || '—');
+      e.cashNet += (r.cash_out || 0) - (r.buy_in || 0);
+      e.games += 1;
+      e.cashRebuys += rebuysOf(r.buy_in);
+    });
+  });
+
+  // Turniere aller Seasons
+  (state.tournaments || []).forEach(t => {
+    const results = t.tournament_results || [];
+    results.forEach(r => {
+      const e = r.player_id ? get(r.player_id, r.player_name || '—')
+                            : (byName[r.player_name] || get(null, r.player_name || '—'));
+      const prize = r.prize_amount || 0;
+      // Einsatz = Buy-In + tatsaechlich genutzte Rebuys dieses Spielers.
+      // Bei Altdaten ohne gespeicherte Rebuys zaehlt nur der Buy-In.
+      const stake = (t.buy_in || 0) + (r.rebuys || 0) * (t.rebuy_amount || 0);
+      e.tourneys += 1;
+      e.prize += prize;
+      e.stake += stake;
+      e.trnNet += prize - stake;
+      if (r.rank === 1) e.wins += 1;
+      e.trnDetail.push(`${fmtDate(t.date)} ${t.name} · Platz ${r.rank}: ${fmt(prize)} − ${fmt(stake)} = ${prize - stake > 0 ? '+' : ''}${fmt(prize - stake)}`);
+    });
+  });
+
+  const list = Object.values(rows).map(e => ({ ...e, total: e.cashNet + e.trnNet }))
+    .sort((a, b) => b.total - a.total);
+
+  const seasons = new Set([
+    ...state.history.map(gameSeason),
+    ...(state.tournaments || []).map(trnSeason),
+  ]);
+  const totalGames = state.history.length;
+  const totalTourneys = (state.tournaments || []).length;
+  const totalPot = state.history.reduce((s, g) => s + g.game_participants.reduce((ss, r) => ss + (r.buy_in || 0), 0), 0)
+    + (state.tournaments || []).reduce((s, t) => s + (t.total_pot || 0), 0);
+  const totalSec = state.history.reduce((s, g) => s + (g.session_duration_seconds || 0), 0);
+  const totalTimeStr = fmtDuration(totalSec);
+
+  $('alltime-sub').textContent = list.length === 0
+    ? 'Noch keine Daten'
+    : `Cash Games & Turniere über ${seasons.size} Season${seasons.size === 1 ? '' : 's'}`;
+
+  $('alltime-stats').innerHTML = list.length === 0 ? '' : `
+    <div class="stat-tile"><div class="num">${totalGames}</div><div class="lbl">Cash Games</div></div>
+    <div class="stat-tile"><div class="num">${totalTourneys}</div><div class="lbl">Turniere</div></div>
+    <div class="stat-tile"><div class="num">${fmt(totalPot)}</div><div class="lbl">Gesamtvolumen · CHF</div></div>
+    <div class="stat-tile"><div class="num">${seasons.size}</div><div class="lbl">Seasons</div></div>
+    ${totalTimeStr ? `<div class="stat-tile"><div class="num">${esc(totalTimeStr)}</div><div class="lbl">Gesamt Spielzeit</div></div>` : ''}
+  `;
+
+  $('alltime-list').innerHTML = list.length === 0
+    ? '<div class="empty-state">Noch keine Daten</div>'
+    : list.map((p, i) => `
+      <div class="ranking-row">
+        <div class="rank ${i === 0 ? 'rank-1' : ''}">${i === 0 ? '👑' : (i + 1)}</div>
+        <div class="avatar">${esc(initials(p.name))}</div>
+        <div>
+          <div class="player-name">${esc(p.name)}${championBadges(p.playerId)}${p.wins > 0 ? `<span class="trn-champ-badge">🏆 ${p.wins}×</span>` : ''}</div>
+          <div class="games-played" title="${esc([
+            `Cash-Netto: ${fmt(p.cashNet)} aus ${p.games} Cash Game(s)`,
+            `Turnier-Netto: Preisgeld ${fmt(p.prize)} − Einsatz ${fmt(p.stake)} = ${fmt(p.trnNet)}`,
+            ...p.trnDetail,
+            `Gesamt: ${fmt(p.cashNet)} + ${fmt(p.trnNet)} = ${fmt(p.total)}`,
+          ].join('\n'))}">
+            ${p.games} Cash <span class="${p.cashNet > 0 ? 'stat-win' : p.cashNet < 0 ? 'stat-loss' : ''}">${p.cashNet > 0 ? '+' : ''}${fmt(p.cashNet)}</span>
+            &nbsp;·&nbsp; ${p.tourneys} Turnier${p.tourneys === 1 ? '' : 'e'} <span class="${p.trnNet > 0 ? 'stat-win' : p.trnNet < 0 ? 'stat-loss' : ''}">${p.trnNet > 0 ? '+' : ''}${fmt(p.trnNet)}</span>
+            ${p.prize > 0 ? `&nbsp;·&nbsp; Preisgeld ${fmt(p.prize)}` : ''}
+            ${p.cashRebuys > 0 ? `&nbsp;·&nbsp; ♻️ ${p.cashRebuys} Rebuys` : ''}
+          </div>
+        </div>
+        <div class="all-time-amount ${p.total > 0 ? 'stat-win' : p.total < 0 ? 'stat-loss' : ''}">${p.total > 0 ? '+' : ''}${fmt(p.total)}</div>
+        <div style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;">CHF</div>
+      </div>
+    `).join('');
+}
+
+// ── Rebuy-Statistik (Cash Games) ──────────────────────────────────────────
+function renderRebuyStats(entries, filtered, label) {
+  const list = $('rebuy-list');
+  if (!list) return;
+  const ranked = entries.filter(e => e.games > 0)
+    .sort((a, b) => b.rebuys - a.rebuys || b.maxRebuys - a.maxRebuys || a.name.localeCompare(b.name));
+
+  const totalRebuys = entries.reduce((s, e) => s + e.rebuys, 0);
+  const totalGames = filtered.length;
+  const record = entries.reduce((best, e) => (e.maxRebuys > (best?.maxRebuys || 0) ? e : best), null);
+
+  $('rebuy-sub').textContent = totalGames === 0
+    ? 'Keine Spiele in diesem Zeitraum'
+    : `Ein Rebuy = ${REBUY_STEP} CHF · ${label}`;
+
+  $('rebuy-stats').innerHTML = totalGames === 0 ? '' : `
+    <div class="stat-tile"><div class="num">${totalRebuys}</div><div class="lbl">Rebuys total</div></div>
+    <div class="stat-tile"><div class="num">${fmt(totalRebuys * REBUY_STEP)}</div><div class="lbl">Rebuy-Volumen · CHF</div></div>
+    <div class="stat-tile"><div class="num">${totalGames ? (totalRebuys / totalGames).toFixed(1) : '0.0'}</div><div class="lbl">Ø pro Abend</div></div>
+    ${record && record.maxRebuys > 0 ? `<div class="stat-tile"><div class="num">${record.maxRebuys}</div><div class="lbl">Rekord · ${esc(record.name)}</div></div>` : ''}
+  `;
+
+  if (ranked.length === 0 || totalRebuys === 0) {
+    list.innerHTML = `<div class="empty-state">${totalGames === 0 ? 'Keine Spiele in diesem Zeitraum' : 'Noch keine Rebuys — alle brav geblieben'}</div>`;
+    return;
+  }
+
+  list.innerHTML = ranked.map((p, i) => {
+    const avg = p.games ? (p.rebuys / p.games) : 0;
+    const medal = i === 0 ? '♻️' : (i + 1);
+    return `
+      <div class="ranking-row" title="${esc(
+        `${p.name}: ${fmt(p.buyIn)} CHF Buy-In über ${p.games} Abend(e) = ${p.games} Einkäufe à ${REBUY_STEP} + ${p.rebuys} Rebuys`
+      )}">
+        <div class="rank ${i === 0 ? 'rank-1' : ''}">${medal}</div>
+        <div class="avatar">${esc(initials(p.name))}</div>
+        <div>
+          <div class="player-name">${esc(p.name)}${i === 0 && p.rebuys > 0 ? '<span class="rebuy-king-badge">Rebuy-König</span>' : ''}</div>
+          <div class="games-played">
+            Ø ${avg.toFixed(1)} pro Abend · Rekord ${p.maxRebuys}${p.maxRebuyDate ? ` (${fmtDate(p.maxRebuyDate)})` : ''}
+            · ${p.gamesWithRebuy}/${p.games} Abende mit Rebuy
+          </div>
+        </div>
+        <div class="all-time-amount" style="color: var(--gold);">${p.rebuys}×</div>
+        <div style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;">${fmt(p.rebuys * REBUY_STEP)}<br>CHF</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// STATISTIK-TAB
+// ══════════════════════════════════════════════════════════════
+
+let statsSeason = ACTIVE_SEASON;   // 1 | 2 | 3 | 'all'
+const statsIsAll = () => statsSeason === 'all';
+const statsLabel = () => statsIsAll() ? 'All-Time' : `Season ${statsSeason}`;
+
+document.querySelectorAll('#stats-season-tabs .season-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.sseason;
+    statsSeason = v === 'all' ? 'all' : parseInt(v);
+    document.querySelectorAll('#stats-season-tabs .season-tab')
+      .forEach(b => b.classList.toggle('active', b === btn));
+    renderStats();
+  });
+});
+
+/* Baut pro Spieler alle Kennzahlen aus den Cash Games der gewaehlten Season */
+function buildStatsEntries(games) {
+  const map = {};
+  games.forEach(g => {
+    g.game_participants.forEach(r => {
+      const key = r.player_id;
+      if (!map[key]) map[key] = {
+        id: key, name: r.players?.name || '—', net: 0, games: 0,
+        biggestWin: 0, biggestLoss: 0, buyIn: 0, cashOut: 0,
+        rebuys: 0, maxRebuys: 0, maxRebuyDate: null, gamesWithRebuy: 0,
+        wins: 0, losses: 0, zero: 0, results: [], seconds: 0,
+        bestDate: null, worstDate: null, bestRank: 99, nights1st: 0,
+      };
+      const e = map[key];
+      const net = (r.cash_out || 0) - (r.buy_in || 0);
+      e.net += net;
+      e.games += 1;
+      e.buyIn += (r.buy_in || 0);
+      e.cashOut += (r.cash_out || 0);
+      e.results.push({ net, date: g.date });
+      e.seconds += (g.session_duration_seconds || 0);
+      if (net > 0) e.wins += 1; else if (net < 0) e.losses += 1; else e.zero += 1;
+      if (net > e.biggestWin) { e.biggestWin = net; e.bestDate = g.date; }
+      if (net < e.biggestLoss) { e.biggestLoss = net; e.worstDate = g.date; }
+      const rb = rebuysOf(r.buy_in);
+      e.rebuys += rb;
+      if (rb > 0) e.gamesWithRebuy += 1;
+      if (rb > e.maxRebuys) { e.maxRebuys = rb; e.maxRebuyDate = g.date; }
+    });
+    // Abend-Sieger ermitteln
+    const best = [...g.game_participants]
+      .sort((a, b) => ((b.cash_out||0)-(b.buy_in||0)) - ((a.cash_out||0)-(a.buy_in||0)))[0];
+    if (best && map[best.player_id] && ((best.cash_out||0)-(best.buy_in||0)) > 0) {
+      map[best.player_id].nights1st += 1;
+    }
+  });
+
+  // Abgeleitete Werte: Durchschnitt, Standardabweichung, Konstanz, Serien
+  Object.values(map).forEach(e => {
+    e.avg = e.games ? e.net / e.games : 0;
+    const varSum = e.results.reduce((s, r) => s + Math.pow(r.net - e.avg, 2), 0);
+    e.sd = e.games > 1 ? Math.sqrt(varSum / e.games) : 0;
+    e.winRate = e.games ? (e.wins / e.games) * 100 : 0;
+    e.roi = e.buyIn ? (e.net / e.buyIn) * 100 : 0;
+    e.range = e.biggestWin - e.biggestLoss;
+    e.rated = e.games >= 3;          // Konstanz erst ab 3 Abenden
+
+    // Laengste Gewinn-/Verlustserie (chronologisch)
+    const chrono = [...e.results].sort((a, b) => a.date.localeCompare(b.date));
+    let cw = 0, cl = 0;
+    e.streakWin = 0; e.streakLoss = 0;
+    chrono.forEach(r => {
+      if (r.net > 0) { cw++; cl = 0; } else if (r.net < 0) { cl++; cw = 0; } else { cw = 0; cl = 0; }
+      if (cw > e.streakWin) e.streakWin = cw;
+      if (cl > e.streakLoss) e.streakLoss = cl;
+    });
+    e.currentForm = chrono.slice(-5).map(r => r.net);
+  });
+  return Object.values(map);
+}
+
+/* Konstanz-Score: 100 = alle Abende exakt gleich, 0 = extreme Schwankung.
+   Normiert auf die groesste Streuung in der Gruppe, damit der Wert
+   unabhaengig von der Einsatzhoehe vergleichbar bleibt. */
+function applyKonstanzScore(entries) {
+  const rated = entries.filter(e => e.rated);
+  if (rated.length === 0) return;
+  const maxSd = Math.max(...rated.map(e => e.sd), 1);
+  rated.forEach(e => { e.konstanz = Math.round(100 - (e.sd / maxSd) * 100); });
+}
+
+function statsFormDots(nets) {
+  if (!nets.length) return '';
+  return '<span class="form-dots">' + nets.map(n => {
+    const cls = n > 0 ? 'w' : n < 0 ? 'l' : 'd';
+    return `<i class="form-dot ${cls}" title="${n > 0 ? '+' : ''}${fmt(n)}"></i>`;
+  }).join('') + '</span>';
+}
+
+function renderStats() {
+  if (!$('stats-overview')) return;
+  const games = state.history.filter(g => statsIsAll() || gameSeason(g) === statsSeason);
+  const entries = buildStatsEntries(games);
+  applyKonstanzScore(entries);
+
+  // ── Übersicht ───────────────────────────────────────────────
+  const totalPot = games.reduce((s, g) => s + g.game_participants.reduce((ss, r) => ss + (r.buy_in || 0), 0), 0);
+  const totalRebuys = entries.reduce((s, e) => s + e.rebuys, 0);
+  const totalSec = games.reduce((s, g) => s + (g.session_duration_seconds || 0), 0);
+  const avgPlayers = games.length ? games.reduce((s, g) => s + g.game_participants.length, 0) / games.length : 0;
+  const seasonTrn = (state.tournaments || []).filter(t => statsIsAll() || trnSeason(t) === statsSeason);
+
+  $('stats-sub').textContent = games.length === 0
+    ? `Noch keine Cash Games in ${statsLabel()}`
+    : `${games.length} Cash Game${games.length === 1 ? '' : 's'} · ${entries.length} Spieler · ${statsLabel()}`;
+
+  $('stats-overview').innerHTML = games.length === 0 ? '' : `
+    <div class="stat-tile"><div class="num">${games.length}</div><div class="lbl">Spielabende</div></div>
+    <div class="stat-tile"><div class="num">${seasonTrn.length}</div><div class="lbl">Turniere</div></div>
+    <div class="stat-tile"><div class="num">${fmt(totalPot)}</div><div class="lbl">Total Pot · CHF</div></div>
+    <div class="stat-tile"><div class="num">${totalRebuys}</div><div class="lbl">Rebuys</div></div>
+    <div class="stat-tile"><div class="num">${avgPlayers.toFixed(1)}</div><div class="lbl">Ø Spieler/Abend</div></div>
+    ${fmtDuration(totalSec) ? `<div class="stat-tile"><div class="num">${esc(fmtDuration(totalSec))}</div><div class="lbl">Gesamt Spielzeit</div></div>` : ''}
+  `;
+
+  // ── Rekorde & Auszeichnungen ────────────────────────────────
+  const awards = $('stats-awards');
+  if (entries.length === 0) {
+    awards.innerHTML = '<div class="empty-state">Noch keine Daten</div>';
+  } else {
+    const top = (arr, pick, cond = () => true) => {
+      const valid = arr.filter(cond);
+      if (!valid.length) return null;
+      return valid.reduce((b, e) => (pick(e) > pick(b) ? e : b));
+    };
+    const konstanzBest = top(entries, e => e.konstanz || 0, e => e.rated);
+    const chaosBest    = entries.filter(e => e.rated).sort((a, b) => b.sd - a.sd)[0];
+    const items = [
+      { icon: '🎯', title: 'Konstantester Spieler', e: konstanzBest,
+        val: konstanzBest ? `Score ${konstanzBest.konstanz}` : '',
+        sub: konstanzBest ? `σ ${fmt(konstanzBest.sd)} CHF · Ø ${konstanzBest.avg > 0 ? '+' : ''}${fmt(konstanzBest.avg)}/Abend` : '' },
+      { icon: '🎢', title: 'Grösste Achterbahn', e: chaosBest,
+        val: chaosBest ? `σ ${fmt(chaosBest.sd)}` : '',
+        sub: chaosBest ? `von ${fmt(chaosBest.biggestLoss)} bis +${fmt(chaosBest.biggestWin)}` : '' },
+      { icon: '💰', title: 'Bester Abend', e: top(entries, e => e.biggestWin),
+        fmtVal: e => `+${fmt(e.biggestWin)}`, fmtSub: e => e.bestDate ? fmtDate(e.bestDate) : '' },
+      { icon: '💸', title: 'Schwärzester Abend', e: entries.reduce((b, e) => (e.biggestLoss < b.biggestLoss ? e : b)),
+        fmtVal: e => fmt(e.biggestLoss), fmtSub: e => e.worstDate ? fmtDate(e.worstDate) : '' },
+      { icon: '🏅', title: 'Meiste Abend-Siege', e: top(entries, e => e.nights1st),
+        fmtVal: e => `${e.nights1st}×`, fmtSub: e => `aus ${e.games} Abenden` },
+      { icon: '📈', title: 'Beste Siegquote', e: top(entries, e => e.winRate, e => e.games >= 3),
+        fmtVal: e => `${e.winRate.toFixed(0)} %`, fmtSub: e => `${e.wins} von ${e.games} Abenden` },
+      { icon: '🔥', title: 'Längste Siegesserie', e: top(entries, e => e.streakWin),
+        fmtVal: e => `${e.streakWin}×`, fmtSub: () => 'Abende in Folge' },
+      { icon: '🧊', title: 'Längste Pechsträhne', e: top(entries, e => e.streakLoss),
+        fmtVal: e => `${e.streakLoss}×`, fmtSub: () => 'Abende in Folge' },
+      { icon: '♻️', title: 'Rebuy-König', e: top(entries, e => e.rebuys),
+        fmtVal: e => `${e.rebuys}×`, fmtSub: e => `${fmt(e.rebuys * REBUY_STEP)} CHF nachgelegt` },
+      { icon: '🪨', title: 'Sparsamster Spieler', e: entries.filter(e => e.games >= 3).sort((a, b) => (a.rebuys / a.games) - (b.rebuys / b.games))[0],
+        fmtVal: e => `Ø ${(e.rebuys / e.games).toFixed(1)}`, fmtSub: () => 'Rebuys pro Abend' },
+      { icon: '🎖️', title: 'Treuster Spieler', e: top(entries, e => e.games),
+        fmtVal: e => `${e.games}×`, fmtSub: () => 'Abende dabei' },
+      { icon: '💹', title: 'Bester ROI', e: top(entries, e => e.roi, e => e.games >= 3),
+        fmtVal: e => `${e.roi > 0 ? '+' : ''}${e.roi.toFixed(0)} %`, fmtSub: e => `auf ${fmt(e.buyIn)} CHF Einsatz` },
+    ];
+    awards.innerHTML = '<div class="award-grid">' + items.filter(it => it.e).map(it => `
+      <div class="award-card">
+        <div class="award-icon">${it.icon}</div>
+        <div class="award-body">
+          <div class="award-title">${it.title}</div>
+          <div class="award-name">${esc(it.e.name)}</div>
+          <div class="award-sub">${esc(it.fmtSub ? it.fmtSub(it.e) : (it.sub || ''))}</div>
+        </div>
+        <div class="award-val">${esc(it.fmtVal ? it.fmtVal(it.e) : (it.val || ''))}</div>
+      </div>
+    `).join('') + '</div>';
+  }
+
+  // ── Konstanz-Rangliste ──────────────────────────────────────
+  const kList = $('konstanz-list');
+  const rated = entries.filter(e => e.rated).sort((a, b) => a.sd - b.sd);
+  const unrated = entries.filter(e => !e.rated);
+  $('konstanz-sub').textContent = rated.length === 0
+    ? 'Mindestens 3 Abende pro Spieler nötig'
+    : `${rated.length} gewertete Spieler · ${statsLabel()}`;
+
+  kList.innerHTML = rated.length === 0
+    ? '<div class="empty-state">Noch zu wenig Daten (min. 3 Abende pro Spieler)</div>'
+    : rated.map((p, i) => `
+      <div class="ranking-row" title="${esc(
+        `${p.name}: Ø ${fmt(p.avg)} CHF pro Abend, Streuung σ ${fmt(p.sd)} CHF\n` +
+        `Spanne: ${fmt(p.biggestLoss)} bis +${fmt(p.biggestWin)} über ${p.games} Abende`
+      )}">
+        <div class="rank ${i === 0 ? 'rank-1' : ''}">${i === 0 ? '🎯' : (i + 1)}</div>
+        <div class="avatar">${esc(initials(p.name))}</div>
+        <div>
+          <div class="player-name">${esc(p.name)}${i === 0 ? '<span class="konstanz-badge">Mr. Konstant</span>'  : ''}</div>
+          <div class="games-played">
+            Ø <span class="${p.avg > 0 ? 'stat-win' : p.avg < 0 ? 'stat-loss' : ''}">${p.avg > 0 ? '+' : ''}${fmt(p.avg)}</span>/Abend
+            · σ ${fmt(p.sd)} · Spanne ${fmt(p.biggestLoss)} … +${fmt(p.biggestWin)}
+            ${statsFormDots(p.currentForm)}
+          </div>
+        </div>
+        <div class="all-time-amount" style="color: var(--gold);">${p.konstanz}</div>
+        <div style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace;">Score</div>
+      </div>
+    `).join('')
+      + (unrated.length ? `<div class="konstanz-hint">Noch ohne Wertung (unter 3 Abende): ${unrated.map(u => esc(u.name)).join(', ')}</div>` : '');
+
+  // ── Rebuy-Statistik ─────────────────────────────────────────
+  renderRebuyStats(entries, games, statsLabel());
+
+  // ── Spieler-Details ─────────────────────────────────────────
+  const pList = $('stats-players');
+  const byNet = [...entries].sort((a, b) => b.net - a.net);
+  pList.innerHTML = byNet.length === 0
+    ? '<div class="empty-state">Noch keine Daten</div>'
+    : byNet.map(p => `
+      <details class="stats-detail">
+        <summary>
+          <span class="avatar">${esc(initials(p.name))}</span>
+          <span class="player-name">${esc(p.name)}</span>
+          <span class="games-played">${p.games} Abende</span>
+          <span class="all-time-amount ${p.net > 0 ? 'stat-win' : p.net < 0 ? 'stat-loss' : ''}">${p.net > 0 ? '+' : ''}${fmt(p.net)}</span>
+        </summary>
+        <div class="stats-detail-grid">
+          <div><span>Ø pro Abend</span><b class="${p.avg > 0 ? 'stat-win' : p.avg < 0 ? 'stat-loss' : ''}">${p.avg > 0 ? '+' : ''}${fmt(p.avg)}</b></div>
+          <div><span>Konstanz-Score</span><b>${p.rated ? p.konstanz : '—'}</b></div>
+          <div><span>Streuung σ</span><b>${fmt(p.sd)}</b></div>
+          <div><span>Siegquote</span><b>${p.winRate.toFixed(0)} %</b></div>
+          <div><span>Bilanz</span><b>${p.wins}S / ${p.losses}N${p.zero ? ` / ${p.zero}±0` : ''}</b></div>
+          <div><span>Abend-Siege</span><b>${p.nights1st}×</b></div>
+          <div><span>Bester Abend</span><b class="stat-win">+${fmt(p.biggestWin)}</b></div>
+          <div><span>Schlechtester</span><b class="stat-loss">${fmt(p.biggestLoss)}</b></div>
+          <div><span>Siegesserie</span><b>${p.streakWin}×</b></div>
+          <div><span>Pechsträhne</span><b>${p.streakLoss}×</b></div>
+          <div><span>Rebuys</span><b>${p.rebuys}× (Ø ${(p.rebuys / (p.games || 1)).toFixed(1)})</b></div>
+          <div><span>Buy-In total</span><b>${fmt(p.buyIn)}</b></div>
+          <div><span>Cash-Out total</span><b>${fmt(p.cashOut)}</b></div>
+          <div><span>ROI</span><b class="${p.roi > 0 ? 'stat-win' : p.roi < 0 ? 'stat-loss' : ''}">${p.roi > 0 ? '+' : ''}${p.roi.toFixed(0)} %</b></div>
+          ${fmtDuration(p.seconds) ? `<div><span>Spielzeit</span><b>${esc(fmtDuration(p.seconds))}</b></div>` : ''}
+          <div><span>Letzte 5</span><b>${statsFormDots(p.currentForm) || '—'}</b></div>
+        </div>
+      </details>
+    `).join('');
+}
+
 function renderHistory() {
-  computeSeason1Champion();
-  if ($('ranking-title')) $('ranking-title').textContent = `Season ${currentSeason} Rangliste`;
+  computeSeasonChampions();  if ($('ranking-title')) $('ranking-title').textContent = isAllTime() ? 'All-Time Rangliste' : `Season ${currentSeason} Rangliste`;
   rebuildFilterOptions();
   const filtered = getFiltered();
   // Also refresh tournament sub-view (updates champs badge etc.)
   if ($('trn-history-list')) renderTournamentHistory();
+  renderAllTimeTable();
 
   const totals = {};
   filtered.forEach(g => {
     g.game_participants.forEach(r => {
       const net = (r.cash_out || 0) - (r.buy_in || 0);
       const key = r.player_id;
-      if (!totals[key]) totals[key] = { id: key, name: r.players.name, net: 0, games: 0, biggestWin: 0, biggestLoss: 0 };
+      if (!totals[key]) totals[key] = {
+        id: key, name: r.players.name, net: 0, games: 0, biggestWin: 0, biggestLoss: 0,
+        buyIn: 0, rebuys: 0, maxRebuys: 0, maxRebuyDate: null, gamesWithRebuy: 0,
+      };
       totals[key].net += net;
       totals[key].games += 1;
       if (net > totals[key].biggestWin) totals[key].biggestWin = net;
       if (net < totals[key].biggestLoss) totals[key].biggestLoss = net;
+      // Rebuys: erster 20er ist der Buy-In, jede weitere 20er-Stufe ein Rebuy
+      const rb = rebuysOf(r.buy_in);
+      totals[key].buyIn += (r.buy_in || 0);
+      totals[key].rebuys += rb;
+      if (rb > 0) totals[key].gamesWithRebuy += 1;
+      if (rb > totals[key].maxRebuys) { totals[key].maxRebuys = rb; totals[key].maxRebuyDate = g.date; }
     });
   });
   const ranking = Object.values(totals).sort((a, b) => b.net - a.net);
 
-  $('history-sub').textContent = filtered.length === 0 ? 'Keine Spiele in diesem Zeitraum' : `${filtered.length} Spiel${filtered.length === 1 ? '' : 'e'}`;
+  $('history-sub').textContent = filtered.length === 0
+    ? 'Keine Spiele in diesem Zeitraum'
+    : `${filtered.length} Spiel${filtered.length === 1 ? '' : 'e'}${isAllTime() ? ' · alle Seasons' : ''}`;
 
   const totalPot = filtered.reduce((s, g) => s + g.game_participants.reduce((ss, r) => ss + (r.buy_in || 0), 0), 0);
   const biggestWin = Math.max(0, ...Object.values(totals).map(t => t.biggestWin));
@@ -1771,7 +2394,7 @@ function renderHistory() {
   rankList.innerHTML = '';
   const tournamentWins = getTournamentWinnersMap();
   ranking.forEach((p, i) => {
-    const isChamp = season1ChampId && p.id === season1ChampId;
+    const badges = championBadges(p.id);
     const trnWins = tournamentWins[p.id] || 0;
     const row = document.createElement('div');
     row.className = 'ranking-row';
@@ -1779,7 +2402,7 @@ function renderHistory() {
       <div class="rank ${i === 0 ? 'rank-1' : ''}">${i + 1}</div>
       <div class="avatar">${esc(initials(p.name))}</div>
       <div>
-        <div class="player-name">${esc(p.name)}${isChamp ? '<span class="s1-badge">S1 Champ</span>' : ''}${trnWins > 0 ? `<span class="trn-champ-badge">🏆 ${trnWins}×</span>` : ''}</div>
+        <div class="player-name">${esc(p.name)}${badges}${trnWins > 0 ? `<span class="trn-champ-badge">🏆 ${trnWins}×</span>` : ''}</div>
         <div class="games-played">${p.games} Spiel${p.games === 1 ? '' : 'e'}</div>
       </div>
       <div class="all-time-amount ${p.net > 0 ? 'stat-win' : p.net < 0 ? 'stat-loss' : ''}">${p.net > 0 ? '+' : ''}${fmt(p.net)}</div>
@@ -1801,14 +2424,17 @@ function renderHistory() {
     card.className = 'history-game';
     const resultsHtml = results.map(r => {
       const net = (r.cash_out||0) - (r.buy_in||0);
-      return `<div class="history-result"><span style="color: var(--muted);">${esc(r.players.name)}</span> <span class="${net > 0 ? 'stat-win' : net < 0 ? 'stat-loss' : ''}">${net > 0 ? '+' : ''}${fmt(net)}</span></div>`;
+      const rb = rebuysOf(r.buy_in);
+      return `<div class="history-result" title="${esc(`Buy-In ${fmt(r.buy_in || 0)} CHF = ${rb} Rebuy${rb === 1 ? '' : 's'}`)}"><span style="color: var(--muted);">${esc(r.players.name)}</span> <span class="${net > 0 ? 'stat-win' : net < 0 ? 'stat-loss' : ''}">${net > 0 ? '+' : ''}${fmt(net)}</span>${rb > 0 ? `<span class="hist-rebuy">♻️${rb}</span>` : ''}</div>`;
     }).join('');
+    const gameRebuys = g.game_participants.reduce((s, r) => s + rebuysOf(r.buy_in), 0);
     const durStr = fmtDuration(g.session_duration_seconds);
     card.innerHTML = `
       <div class="history-game-head">
-        <div class="history-date">${fmtDate(g.date)}${g.location ? ' · ' + esc(g.location) : ''}</div>
+        <div class="history-date">${fmtDate(g.date)}${g.location ? ' · ' + esc(g.location) : ''}${isAllTime() ? ` · S${gameSeason(g)}` : ''}</div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           ${durStr ? `<span class="history-duration">${esc(durStr)}</span>` : ''}
+          ${gameRebuys > 0 ? `<span class="history-duration">♻️ ${gameRebuys} Rebuys</span>` : ''}
           <div class="history-pot">Pot: ${fmt(pot)} CHF</div>
         </div>
       </div>
@@ -2299,7 +2925,7 @@ async function trnSaveTournament() {
     player_count: totalP,
     rebuys_used: trnRebuysUsedTotal(),
     total_pot: pot,
-    season: currentSeason || 2,
+    season: ACTIVE_SEASON,
   };
   const { data: tourney, error } = await sb.from('tournaments').insert(insertRow).select().single();
   if (error) { btn.disabled = false; toast('Fehler: ' + error.message); return; }
@@ -2310,9 +2936,19 @@ async function trnSaveTournament() {
   const resultRows = ranking.map(p => {
     const prizeDef = TRN_PRIZE_DISTRIBUTION.find(x => x.rank === p.rank);
     const prize = prizeDef ? pot * prizeDef.percentage / 100 : 0;
-    return { tournament_id: tourney.id, rank: p.rank, player_id: p.playerId || null, player_name: p.name, prize_amount: prize };
+    return {
+      tournament_id: tourney.id, rank: p.rank, player_id: p.playerId || null,
+      player_name: p.name, prize_amount: prize, rebuys: p.rebuys || 0,
+    };
   });
-  const { error: e2 } = await sb.from('tournament_results').insert(resultRows);
+  let { error: e2 } = await sb.from('tournament_results').insert(resultRows);
+  // Fallback, falls migration_season3.sql noch nicht eingespielt wurde
+  // (Spalte "rebuys" fehlt) -> ohne dieses Feld erneut versuchen.
+  if (e2 && /rebuys/i.test(e2.message || '')) {
+    const legacyRows = resultRows.map(({ rebuys, ...rest }) => rest);
+    ({ error: e2 } = await sb.from('tournament_results').insert(legacyRows));
+    if (!e2) toast('Hinweis: migration_season3.sql noch ausführen');
+  }
   btn.disabled = false;
   if (e2) { toast('Ergebnisse: ' + e2.message); return; }
   trnT.savedTournamentId = tourney.id;

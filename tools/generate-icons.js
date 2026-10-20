@@ -1,7 +1,7 @@
 /**
  * Erzeugt die PWA-Icons (reines Node, keine Dependencies).
  * Aufruf:  node tools/generate-icons.js
- * Motiv:   dunkler Hintergrund + gruener Chip + Pik-Symbol
+ * Motiv:   dunkler Hintergrund + pink/violetter Chip + Pik-Symbol
  *
  * Ergebnis: icons/icon-192.png, icon-512.png, icon-512-maskable.png,
  *           icons/apple-touch-icon-180.png
@@ -12,10 +12,10 @@ const zlib = require('zlib');
 
 const OUT_DIR = path.join(__dirname, '..', 'icons');
 
-const BG = [11, 18, 32];       // #0b1220
-const CHIP = [34, 197, 94];    // #22c55e
-const CHIP_DARK = [22, 101, 52];
-const INK = [8, 14, 25];
+const BG = [22, 10, 38];       // #160a26
+const CHIP = [217, 70, 239];   // #d946ef
+const CHIP_DARK = [124, 45, 190];
+const INK = [26, 8, 44];
 
 /* ---------- PNG schreiben ---------- */
 const CRC_TABLE = (() => {

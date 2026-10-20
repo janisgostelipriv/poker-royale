@@ -59,3 +59,27 @@ node tools/generate-icons.js
 
 **Nach App-Änderungen**: in `sw.js` die `CACHE_VERSION` hochzählen, damit Clients das Update sicher ziehen.
 
+## 7. Seasons
+
+Spiele und Turniere sind über die Spalte `season` einer Season zugeordnet.
+Alte Seasons bleiben als Archiv erhalten und sind im Tab *Verlauf* über die
+Season-Tabs abrufbar. Zusätzlich gibt es den Tab **★ All-Time** mit einer
+Gesamtwertung über alle Seasons (Cash Games **und** Turniere).
+
+| Season | Status | Migration |
+|---|---|---|
+| 1 | Archiv | `migration_season2.sql` |
+| 2 | Archiv | `migration_season2.sql` |
+| 3 | **aktiv** | `migration_season3.sql` |
+
+**Neue Season starten:**
+1. Migration schreiben: `ALTER TABLE games/tournaments ALTER COLUMN season SET DEFAULT <n>;`
+   (siehe `migration_season3.sql`) und im Supabase SQL Editor ausführen.
+2. In `index.html`: `ACTIVE_SEASON` auf `<n>` setzen und die vorherige Season
+   zu `ARCHIVED_SEASONS` hinzufügen.
+3. Season-Tab-Buttons in `#tab-history` ergänzen.
+4. `CACHE_VERSION` in `sw.js` hochzählen.
+
+Der Champion einer abgeschlossenen Season (bestes Cash-Game-Netto) bekommt
+automatisch sein Abzeichen (`S1 Champ`, `S2 Champ`, …) neben dem Namen.
+
